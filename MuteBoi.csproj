@@ -2,43 +2,50 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <Version>1.2.0</Version>
     <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>muteboi</AssemblyName>
+    <StartupObject>MuteBoi.MuteBoi</StartupObject>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <PublishSingleFile>true</PublishSingleFile>
+    <TrimMode>partial</TrimMode>
+    <DebugType>embedded</DebugType>
+
     <Authors>KarlofDuty</Authors>
-    <Company>KarlofDuty</Company>
     <Description>A Discord bot made to stop users from simply rejoining a server when they get given a muted role.</Description>
-    <Title>MuteBoi</Title>
-    <PackageLicenseUrl>https://github.com/KarlOfDuty/MuteBoi/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/KarlOfDuty/MuteBoi</RepositoryUrl>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <PackageVersion>1.1.0-A</PackageVersion>
     <NeutralLanguage>en</NeutralLanguage>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/KarlOfDuty/MuteBoi</RepositoryUrl>
+
+    <PackageIconUrl>https://karlofduty.com/img/tardisIcon.jpg</PackageIconUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/KarlOfDuty/MuteBoi</PackageProjectUrl>
+    <PackageVersion>1.2.0</PackageVersion>
+    <LangVersion>default</LangVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <GitVersion>false</GitVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE</DefineConstants>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="DSharpPlus" Version="4.5.1" />
-    <PackageReference Include="MySql.Data" Version="9.5.0" />
+    <PackageReference Include="EmbeddedBuildTime" Version="1.0.3" />
+    <PackageReference Include="GitInfo" Version="3.3.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.0" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Tmds.Systemd" Version="0.8.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <EmbeddedResource Include="default_config.yml" />
   </ItemGroup>
 </Project>

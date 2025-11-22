@@ -14,7 +14,7 @@ namespace MuteBoi
   {
     public static Task OnReady(DiscordClient client, ReadyEventArgs e)
     {
-      Logger.Log(LogID.DISCORD, "Client is ready to process events.");
+      Logger.Log("Client is ready to process events.");
 
       // Checking activity type
       if (!Enum.TryParse(Config.presenceType, true, out ActivityType activityType))
@@ -29,20 +29,20 @@ namespace MuteBoi
 
     public static Task OnGuildAvailable(DiscordClient _, GuildCreateEventArgs e)
     {
-      Logger.Log(LogID.DISCORD, "Guild available: " + e.Guild.Name);
+      Logger.Log("Guild available: " + e.Guild.Name);
 
       IReadOnlyDictionary<ulong, DiscordRole> roles = e.Guild.Roles;
 
       foreach ((ulong roleID, DiscordRole role) in roles)
       {
-        Logger.Log(LogID.DISCORD, role.Name.PadRight(40, '.') + roleID);
+        Logger.Log(role.Name.PadRight(40, '.') + roleID);
       }
       return Task.CompletedTask;
     }
 
     public static Task OnClientError(DiscordClient _, ClientErrorEventArgs e)
     {
-      Logger.Error(LogID.DISCORD, "Exception occured:\n" + e.Exception);
+      Logger.Error("Exception occured:\n" + e.Exception);
       return Task.CompletedTask;
     }
 
@@ -52,7 +52,7 @@ namespace MuteBoi
       {
         if (Config.trackedRoles.Contains(role.Id))
         {
-          Logger.Log(LogID.DISCORD, e.Member.DisplayName + " (" + e.Member.Id + ") left the server with tracked role '" + role.Name + "'.");
+          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") left the server with tracked role '" + role.Name + "'.");
           Database.TryAddRole(e.Member.Id, role.Id);
         }
       }
@@ -69,7 +69,7 @@ namespace MuteBoi
         {
 
           DiscordRole role = e.Guild.GetRole(savedRole.roleID);
-          Logger.Log(LogID.DISCORD, e.Member.DisplayName + " (" + e.Member.Id + ") were given back the role '" + role.Name + "' on rejoin. ");
+          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") were given back the role '" + role.Name + "' on rejoin. ");
           await e.Member.GrantRoleAsync(role);
         }
         catch (NotFoundException) {}

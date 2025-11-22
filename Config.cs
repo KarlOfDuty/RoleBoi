@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
-using System.Text;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using MuteBoi.Properties;
 using YamlDotNet.Serialization;
 
 namespace MuteBoi
@@ -12,7 +12,6 @@ namespace MuteBoi
     internal const string APPLICATION_NAME = "MuteBoi";
 
     internal static string token = "";
-    internal static string logLevel = "Info";
     internal static ulong[] trackedRoles = [];
     internal static string presenceType = "Playing";
     internal static string presenceText = "";
@@ -23,16 +22,25 @@ namespace MuteBoi
     internal static string username = "";
     internal static string password = "";
 
+    public static string ConfigPath { get; private set; } = "./config.yml";
+
     public static void LoadConfig()
     {
-      // Writes default config to file if it does not already exist
-      if (!File.Exists("./config.yml"))
+      if (!string.IsNullOrEmpty(MuteBoi.commandLineArgs.configPath))
       {
-        File.WriteAllText("./config.yml", Encoding.UTF8.GetString(Resources.default_config));
+        ConfigPath = MuteBoi.commandLineArgs.configPath;
+      }
+
+      Logger.Log("Loading config \"" + Path.GetFullPath(ConfigPath) + "\"");
+
+      // Writes default config to file if it does not already exist
+      if (!File.Exists(ConfigPath))
+      {
+        File.WriteAllText(ConfigPath, Utilities.ReadManifestData("default_config.yml"));
       }
 
       // Reads config contents into FileStream
-      FileStream stream = File.OpenRead("./config.yml");
+      FileStream stream = File.OpenRead(ConfigPath);
 
       // Converts the FileStream into a YAML object
       IDeserializer deserializer = new DeserializerBuilder().Build();
@@ -42,18 +50,25 @@ namespace MuteBoi
       ISerializer serializer = new SerializerBuilder().JsonCompatible().Build();
       JObject json = JObject.Parse(serializer.Serialize(yamlObject));
 
-      token = json.SelectToken("bot.token").Value<string>() ?? "";
-      logLevel = json.SelectToken("bot.console-log-level").Value<string>() ?? "";
-      trackedRoles = json.SelectToken("bot.tracked-roles").Value<JArray>().Values<ulong>().ToArray();
+      string stringLogLevel = json.SelectToken("bot.console-log-level")?.Value<string>() ?? "";
+      if (!Enum.TryParse(stringLogLevel, true, out LogLevel logLevel))
+      {
+        logLevel = LogLevel.Information;
+        Logger.Warn("Log level '" + stringLogLevel + "' is invalid, using 'Information' instead.");
+      }
+      Logger.SetLogLevel(logLevel);
+
+      token = json.SelectToken("bot.token")?.Value<string>() ?? "";
+      trackedRoles = json.SelectToken("bot.tracked-roles")?.Value<JArray>().Values<ulong>().ToArray();
       presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
       presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
 
       // Reads database info
-      hostName = json.SelectToken("database.address").Value<string>() ?? "";
-      port = json.SelectToken("database.port").Value<int>();
-      database = json.SelectToken("database.name").Value<string>() ?? "";
-      username = json.SelectToken("database.user").Value<string>() ?? "";
-      password = json.SelectToken("database.password").Value<string>() ?? "";
+      hostName = json.SelectToken("database.address")?.Value<string>() ?? "";
+      port = json.SelectToken("database.port")?.Value<int>() ?? 3306;
+      database = json.SelectToken("database.name")?.Value<string>() ?? "";
+      username = json.SelectToken("database.user")?.Value<string>() ?? "";
+      password = json.SelectToken("database.password")?.Value<string>() ?? "";
     }
   }
 }
