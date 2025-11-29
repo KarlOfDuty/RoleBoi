@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using DSharpPlus;
 using DSharpPlus.Exceptions;
 using System.Threading;
+using System.IO;
 using Microsoft.Extensions.Hosting.Systemd;
 using Tmds.Systemd;
 
@@ -20,12 +22,15 @@ internal class LoggerProvider : ILoggerProvider
 
 public class Logger(string logCategory) : ILogger
 {
-    public static Logger Instance { get; } = new Logger("MuteBoi");
+    public static Logger Instance { get; } = new Logger(MuteBoi.APPLICATION_NAME);
 
     private static LogLevel minimumLogLevel = LogLevel.Trace;
     private static readonly Lock consoleLock = new();
-    private bool IsSingleton => logCategory == "MuteBoi";
+    private static readonly Lock fileLock = new();
+    private bool IsSingleton => logCategory == MuteBoi.APPLICATION_NAME;
 
+    private static List<string> startupCache = [];
+    private static TextWriter logFileWriter = null;
     private static readonly EventId botEventId = new EventId(420, "BOT");
 
     internal static void SetLogLevel(LogLevel level)
@@ -102,6 +107,7 @@ public class Logger(string logCategory) : ILogger
             return;
         }
 
+        LogToFile(logLevel, message, exception);
         LogToConsoleOrSystemd(logLevel, message, exception);
     }
 
@@ -232,6 +238,130 @@ public class Logger(string logCategory) : ILogger
         }
 
         Console.ResetColor();
+    }
+
+    private void LogToFile(LogLevel logLevel, string message, Exception exception, bool skipCache = false)
+    {
+        // Don't do anything if the config is loaded and we didn't set up a log file
+        if (Config.Initialized && logFileWriter == null)
+        {
+            return;
+        }
+
+        string logLevelTag = logLevel switch
+        {
+            LogLevel.Trace       => "[Trace] ",
+            LogLevel.Debug       => "[Debug] ",
+            LogLevel.Information => " [Info] ",
+            LogLevel.Warning     => " [Warn] ",
+            LogLevel.Error       => "[Error] ",
+            LogLevel.Critical    => " [\e[1mCrit\e[0m] ",
+            _                    => " [None] ",
+        };
+
+        // Add prefix
+        string logMessage = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ": " + logLevelTag + (IsSingleton ? "[BOT] " : "[API] ");
+        int prefixLength = logMessage.Length;
+
+        // Add message with indentation
+        logMessage += message.Replace("\n", "\n" + new string(' ', prefixLength));
+
+        if (exception != null)
+        {
+            logMessage += "\n" + GetExceptionString(exception, 0);
+        }
+
+        using Lock.Scope _ = fileLock.EnterScope();
+        if (!Config.Initialized && !skipCache || logFileWriter == null)
+        {
+            startupCache.Add(logMessage);
+            return;
+        }
+
+        try
+        {
+            logFileWriter.WriteLine(logMessage);
+            logFileWriter.Flush();
+        }
+        catch (Exception e)
+        {
+            Instance.LogToConsoleOrSystemd(LogLevel.Error, "Error writing to log file.", e);
+        }
+    }
+
+    internal static void SetupLogfile()
+    {
+        using Lock.Scope _ = fileLock.EnterScope();
+        if (string.IsNullOrWhiteSpace(Config.LogPath))
+        {
+            startupCache.Clear();
+            logFileWriter?.Close();
+            logFileWriter = null;
+            return;
+        }
+
+        if (File.Exists(Config.LogPath))
+        {
+            try
+            {
+                logFileWriter = File.AppendText(Path.GetFullPath(Config.LogPath));
+
+                // Create some empty rows between bot runs in the log file
+                Instance.LogToFile(LogLevel.Information, "", null, true);
+                Instance.LogToFile(LogLevel.Information, "", null, true);
+                Instance.LogToFile(LogLevel.Information, "", null, true);
+                Instance.LogToFile(LogLevel.Information, "", null, true);
+
+                Log($"Opened log file \"{Path.GetFullPath(Config.LogPath)}\".");
+            }
+            catch (Exception e)
+            {
+                Instance.LogToConsoleOrSystemd(LogLevel.Error, "Error opening log file \"" + Path.GetFullPath(Config.LogPath) + "\".", e);
+                return;
+            }
+        }
+        else
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(Config.LogPath)));
+            }
+            catch (Exception e)
+            {
+                Instance.LogToConsoleOrSystemd(LogLevel.Error, "Error creating log file directory \"" + Path.GetDirectoryName(Path.GetFullPath(Config.LogPath)) + "\".", e);
+            }
+
+            try
+            {
+                logFileWriter = File.CreateText(Path.GetFullPath(Config.LogPath));
+                Log($"Created log file \"{Path.GetFullPath(Config.LogPath)}\".");
+            }
+            catch (Exception e)
+            {
+                Instance.LogToConsoleOrSystemd(LogLevel.Error, "Error creating log file \"" + Path.GetFullPath(Config.LogPath) + "\".", e);
+                return;
+            }
+        }
+
+        // Create a notice at the start of every run
+        Instance.LogToFile(LogLevel.Information, "###################################", null, true);
+        Instance.LogToFile(LogLevel.Information, "##########  BOT STARTUP  ##########", null, true);
+        Instance.LogToFile(LogLevel.Information, "###################################", null, true);
+
+        try
+        {
+            foreach (string line in startupCache)
+            {
+                logFileWriter.WriteLine(line);
+            }
+            logFileWriter.Flush();
+        }
+        catch (Exception e)
+        {
+            Instance.LogToConsoleOrSystemd(LogLevel.Error, "Error writing cache to log file.", e);
+        }
+
+        startupCache.Clear();
     }
 
     private static string GetExceptionString(Exception exception, int indentation = 0)

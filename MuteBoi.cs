@@ -11,7 +11,6 @@ using System.Threading.Channels;
 using DSharpPlus;
 using CommandLine;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
 using Tmds.Systemd;
@@ -22,6 +21,8 @@ namespace MuteBoi;
 internal static class MuteBoi
 {
     internal static DiscordClient client = null;
+
+    internal const string APPLICATION_NAME = "MuteBoi";
 
     private static Timer statusUpdateTimer;
 
@@ -96,12 +97,12 @@ internal static class MuteBoi
 
         if (args.Contains("--version"))
         {
-            Console.WriteLine(Assembly.GetEntryAssembly()?.GetName().Name + ' ' + GetVersion());
+            Console.WriteLine(APPLICATION_NAME + ' ' + GetVersion());
             Console.WriteLine("Build time: " + BuildInfo.BuildTimeUTC.ToString("yyyy-MM-dd HH:mm:ss") + " UTC");
             return 0;
         }
 
-        Logger.Log("Starting " + Assembly.GetEntryAssembly()?.GetName().Name + " version " + GetVersion() + "...");
+        Logger.Log("Starting " + APPLICATION_NAME + " version " + GetVersion() + "...");
         try
         {
             if (!Reload())
@@ -215,26 +216,27 @@ internal static class MuteBoi
 
     private static async Task<bool> Connect()
     {
-          // Setting up client configuration
-          DiscordConfiguration cfg = new DiscordConfiguration
-          {
+        // Setting up client configuration
+        DiscordConfiguration cfg = new DiscordConfiguration
+        {
             Token = Config.token,
             TokenType = TokenType.Bot,
             MinimumLogLevel = LogLevel.Debug,
             AutoReconnect = true,
             Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
-          };
+        };
 
-          client = new DiscordClient(cfg);
+        client = new DiscordClient(cfg);
 
-          Logger.Log("Hooking events...");
-          client.Ready += EventHandler.OnReady;
-          client.GuildAvailable += EventHandler.OnGuildAvailable;
-          client.ClientErrored += EventHandler.OnClientError;
-          client.GuildMemberAdded += EventHandler.OnGuildMemberAdded;
-          client.GuildMemberRemoved += EventHandler.OnGuildMemberRemoved;
+        Logger.Log("Hooking events...");
+        client.Ready += EventHandler.OnReady;
+        client.GuildAvailable += EventHandler.OnGuildAvailable;
+        client.ClientErrored += EventHandler.OnClientError;
+        client.GuildMemberAdded += EventHandler.OnGuildMemberAdded;
+        client.GuildMemberRemoved += EventHandler.OnGuildMemberRemoved;
 
-          Logger.Log("Connecting to Discord...");
+        Logger.Log("Connecting to Discord...");
+        EventHandler.hasLoggedGuilds = false;
 
         try
         {

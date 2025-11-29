@@ -12,6 +12,8 @@ namespace MuteBoi
 {
   static class EventHandler
   {
+    internal static bool hasLoggedGuilds = false;
+
     public static Task OnReady(DiscordClient client, ReadyEventArgs e)
     {
       Logger.Log("Client is ready to process events.");
@@ -24,20 +26,31 @@ namespace MuteBoi
       }
 
       client.UpdateStatusAsync(new DiscordActivity(Config.presenceText, activityType), UserStatus.Online);
+      hasLoggedGuilds = true;
       return Task.CompletedTask;
     }
 
-    public static Task OnGuildAvailable(DiscordClient _, GuildCreateEventArgs e)
+    public static async Task OnGuildAvailable(DiscordClient _, GuildCreateEventArgs e)
     {
-      Logger.Log("Guild available: " + e.Guild.Name);
+      if (hasLoggedGuilds)
+      {
+        return;
+      }
+
+      Logger.Log("Found Discord server: " + e.Guild.Name + " (" + e.Guild.Id + ")");
+
+      if (MuteBoi.commandLineArgs.serversToLeave.Contains(e.Guild.Id))
+      {
+        Logger.Warn("LEAVING DISCORD SERVER AS REQUESTED: " + e.Guild.Name + " (" + e.Guild.Id + ")");
+        await e.Guild.LeaveAsync();
+        return;
+      }
 
       IReadOnlyDictionary<ulong, DiscordRole> roles = e.Guild.Roles;
-
       foreach ((ulong roleID, DiscordRole role) in roles)
       {
         Logger.Log(role.Name.PadRight(40, '.') + roleID);
       }
-      return Task.CompletedTask;
     }
 
     public static Task OnClientError(DiscordClient _, ClientErrorEventArgs e)
