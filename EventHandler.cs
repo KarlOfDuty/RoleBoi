@@ -74,16 +74,27 @@ namespace MuteBoi
 
     public static async Task OnGuildMemberAdded(DiscordClient _, GuildMemberAddEventArgs e)
     {
+      foreach (ulong roleID in Config.everyoneRoles)
+      {
+        try
+        {
+          DiscordRole role = e.Guild.GetRole(roleID);
+          await e.Member.GrantRoleAsync(role);
+          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") was given the '" + role.Name + "' role. ");
+        }
+        catch (NotFoundException) {}
+        catch (UnauthorizedException) {}
+      }
+
       if (!Database.TryGetRoles(e.Member.Id, out List<Database.SavedRole> savedRoles)) return;
 
       foreach (Database.SavedRole savedRole in savedRoles)
       {
         try
         {
-
           DiscordRole role = e.Guild.GetRole(savedRole.roleID);
-          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") were given back the role '" + role.Name + "' on rejoin. ");
           await e.Member.GrantRoleAsync(role);
+          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") was given back the '" + role.Name + "' role on rejoin. ");
         }
         catch (NotFoundException) {}
         catch (UnauthorizedException) {}

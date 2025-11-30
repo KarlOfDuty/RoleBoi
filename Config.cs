@@ -11,6 +11,7 @@ internal static class Config
 {
   internal static string token = "";
   internal static ulong[] trackedRoles = [];
+  internal static ulong[] everyoneRoles = [];
   internal static string presenceType = "Playing";
   internal static string presenceText = "";
 
@@ -67,6 +68,7 @@ internal static class Config
 
     token = json.SelectToken("bot.token")?.Value<string>() ?? "";
     trackedRoles = json.SelectToken("bot.tracked-roles")?.Value<JArray>().Values<ulong>().ToArray();
+    everyoneRoles = json.SelectToken("bot.everyone-roles")?.Value<JArray>().Values<ulong>().ToArray();
     presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
     presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
 
