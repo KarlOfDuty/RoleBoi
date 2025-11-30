@@ -1,4 +1,4 @@
-# MuteBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/MuteBoi/job/master/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FMuteBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/MuteBoi.svg)](https://github.com/KarlOfDuty/MuteBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
+# MuteBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/MuteBoi/job/main/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FMuteBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/MuteBoi.svg)](https://github.com/KarlOfDuty/MuteBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
 Retains specific Discord roles if users leave the server. Useful for muted roles or other permission negating roles. Leaving members are saved in a mysql database with all tracked roles they had when they left.
 
 ## Setup
