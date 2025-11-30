@@ -49,6 +49,7 @@ fi
 %{__install} -d %{buildroot}/etc/muteboi/
 %{__install} -m 600 %{repo_root}/default_config.yml %{buildroot}/etc/muteboi/config.yml
 
+%{__install} -d %{buildroot}/var/lib/muteboi
 %{__install} -d %{buildroot}/var/log/muteboi
 
 %pre
