@@ -1,0 +1,22 @@
+[Unit]
+Description=MuteBoi Discord Bot
+Documentation=https://github.com/KarlOfDuty/MuteBoi
+After=network.target
+Wants=network.target
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+[Service]
+User=muteboi
+Type=notify-reload
+Restart=on-failure
+NotifyAccess=main
+RestartSec=5
+RestartPreventExitStatus=1
+
+ExecStart=/usr/bin/muteboi --config /etc/muteboi/config.yml --log-file /var/log/muteboi/muteboi.log
+ExecReload=/bin/kill -HUP $MAINPID
+
+
+[Install]
+WantedBy=multi-user.target

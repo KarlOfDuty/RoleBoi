@@ -1,0 +1,3 @@
+d /var/lib/muteboi 0700 muteboi muteboi -
+f /etc/muteboi/config.yml 0600 muteboi muteboi -
+d /var/log/muteboi 0755 muteboi muteboi -

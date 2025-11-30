@@ -1,0 +1,55 @@
+# Maintainer: Karl Essinger <xkaess22@gmail.com>
+pkgname=muteboi
+pkgver=1.2.0
+pkgrel=1
+pkgdesc="Retains specific Discord roles if users leave and rejoin the server. Useful for muted roles or other permission negating roles."
+arch=("x86_64")
+url="https://github.com/KarlOfDuty/MuteBoi"
+license=('GPL-3.0-or-later')
+options=('!debug' '!strip')
+depends=(
+  "dotnet-runtime-9.0"
+  "mysql"
+)
+makedepends=(
+  "dotnet-sdk-9.0"
+)
+conflicts=(
+  "muteboi-git"
+)
+install=muteboi.install
+source=("git+${url}.git#tag=${pkgver}")
+sha512sums=("SKIP")
+#validpgpkeys=()
+backup=(etc/muteboi/config.yml)
+
+_srcdir="MuteBoi"
+
+prepare() {
+  cd "$_srcdir"
+  dotnet restore
+}
+
+build() {
+  cd "$_srcdir"
+  dotnet publish MuteBoi.csproj -p:PublishSingleFile=true -r linux-x64 -c Release --self-contained false --output out
+}
+
+package() {
+  cd "$_srcdir"
+
+  install -d "${pkgdir}/usr/bin/"
+  install -Dm 755 out/muteboi "${pkgdir}/usr/bin/"
+
+  install -d "${pkgdir}/usr/lib/systemd/system/"
+  install -Dm 644 packaging/muteboi.service "${pkgdir}/usr/lib/systemd/system/"
+
+  install -d "${pkgdir}/etc/muteboi/"
+  install -Dm 600 default_config.yml "${pkgdir}/etc/muteboi/config.yml"
+
+  install -d "${pkgdir}/usr/lib/sysusers.d/"
+  install -Dm 644 "packaging/muteboi.sysusers" "${pkgdir}/usr/lib/sysusers.d/muteboi.conf"
+
+  install -d "${pkgdir}/usr/lib/tmpfiles.d/"
+  install -Dm 644 "packaging/muteboi.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/muteboi.conf"
+}

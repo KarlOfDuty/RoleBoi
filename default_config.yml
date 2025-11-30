@@ -26,7 +26,7 @@ bot:
   presence-text: "Discord"
 
   # Log all console output to a file, can be overridden using command line arguments. Set to "" to disable.
-  # When running the bot as a service this will be set to "/var/log/supportboi/supportboi.log" by the service.
+  # When running the bot as a service this will be set to "/var/log/muteboi/muteboi.log" by the service.
   # The log file will still log all log levels regardless of the console log level setting.
   log-file: ""
 

@@ -1,0 +1,22 @@
+Source: PACKAGE_NAME
+Section: net
+Priority: optional
+Maintainer: Karl Essinger <xkaess22@gmail.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.6.2
+Homepage: https://github.com/KarlOfDuty/MuteBoi
+Vcs-Browser: https://github.com/KarlOfDuty/MuteBoi
+Vcs-Git: https://github.com/KarlOfDuty/MuteBoi.git
+
+Package: PACKAGE_NAME
+Architecture: amd64
+Multi-Arch: foreign
+Depends:
+ dotnet-runtime-9.0,
+ mariadb-server,
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: Retains specific Discord roles if users leave and rejoin the server. Useful for muted roles or other permission negating roles.
+Conflicts: muteboi, muteboi-dev
