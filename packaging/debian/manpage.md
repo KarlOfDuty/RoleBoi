@@ -4,7 +4,7 @@
 
 # NAME
 
-roleboi - Retains specific Discord roles if users rejoin the server.
+roleboi - A small role management Discord bot.
 
 # SYNOPSIS
 
@@ -14,7 +14,7 @@ roleboi - Retains specific Discord roles if users rejoin the server.
 
 # DESCRIPTION
 
-**roleboi** retains specific Discord roles if users rejoin the server.
+**roleboi** retains specific Discord roles if users rejoin the server. TODO: Update This!
 Useful for muted roles or other permission negating roles.
 Leaving members are saved in a mysql database with all tracked roles they had when they left.
 

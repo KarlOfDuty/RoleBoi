@@ -4,12 +4,12 @@
 
 %if %{defined dev_build}
 Name:       roleboi-dev
-Summary:    Retains specific Discord roles if users rejoin the server (dev build)
+Summary:    A small role management Discord bot (dev build)
 Version:    %{base_version}~%(date "+%%Y%%m%%d%%H%%M%%S")git%(git rev-parse --short HEAD)
 Provides:   roleboi
 %else
 Name:       roleboi
-Summary:    Retains specific Discord roles if users rejoin the server
+Summary:    A small role management Discord bot
 Version:    %{base_version}
 %endif
 Release:    1%{?dist}
@@ -22,6 +22,8 @@ BuildRequires: systemd-rpm-macros
 Requires: dotnet-runtime-9.0
 Requires: mariadb-server
 %{?systemd_requires}
+
+# TODO: Update this!
 
 %description
 Retains specific Discord roles if users rejoin the server.
