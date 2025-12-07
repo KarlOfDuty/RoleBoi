@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using MySqlConnector;
 
-namespace MuteBoi
+namespace RoleBoi
 {
   internal static class Database
   {

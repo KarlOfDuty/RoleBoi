@@ -8,7 +8,7 @@ using System.IO;
 using Microsoft.Extensions.Hosting.Systemd;
 using Tmds.Systemd;
 
-namespace MuteBoi;
+namespace RoleBoi;
 
 internal class LoggerProvider : ILoggerProvider
 {
@@ -22,12 +22,12 @@ internal class LoggerProvider : ILoggerProvider
 
 public class Logger(string logCategory) : ILogger
 {
-    public static Logger Instance { get; } = new Logger(MuteBoi.APPLICATION_NAME);
+    public static Logger Instance { get; } = new Logger(RoleBoi.APPLICATION_NAME);
 
     private static LogLevel minimumLogLevel = LogLevel.Trace;
     private static readonly Lock consoleLock = new();
     private static readonly Lock fileLock = new();
-    private bool IsSingleton => logCategory == MuteBoi.APPLICATION_NAME;
+    private bool IsSingleton => logCategory == RoleBoi.APPLICATION_NAME;
 
     private static List<string> startupCache = [];
     private static TextWriter logFileWriter = null;

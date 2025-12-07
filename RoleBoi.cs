@@ -11,38 +11,42 @@ using System.Threading.Channels;
 using DSharpPlus;
 using CommandLine;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
+using RoleBoi.Commands;
+using RoleManager.Commands;
 using Tmds.Systemd;
 using ServiceState = Tmds.Systemd.ServiceState;
 
-namespace MuteBoi;
+namespace RoleBoi;
 
-internal static class MuteBoi
+internal static class RoleBoi
 {
     internal static DiscordClient client = null;
+    private static SlashCommandsExtension commands = null;
 
-    internal const string APPLICATION_NAME = "MuteBoi";
+    internal const string APPLICATION_NAME = "RoleBoi";
 
     private static Timer statusUpdateTimer;
 
     public class CommandLineArguments
     {
-        [Option('c',
+        [CommandLine.Option('c',
                 "config",
                 Required = false,
                 HelpText = "Select a config file to use.",
                 MetaValue = "PATH")]
         public string configPath { get; set; }
 
-        [Option('l',
+        [CommandLine.Option('l',
             "log-file",
             Required = false,
             HelpText = "Select log file to write bot logs to.",
             MetaValue = "PATH")]
         public string logFilePath { get; set; }
 
-        [Option("leave",
+        [CommandLine.Option("leave",
                 Required = false,
                 HelpText = "Leaves one or more Discord servers. " +
                            "You can check which servers your bot is in when it starts up.",
@@ -234,6 +238,24 @@ internal static class MuteBoi
         client.ClientErrored += EventHandler.OnClientError;
         client.GuildMemberAdded += EventHandler.OnGuildMemberAdded;
         client.GuildMemberRemoved += EventHandler.OnGuildMemberRemoved;
+        client.ComponentInteractionCreated += EventHandler.OnComponentInteractionCreated;
+
+        Logger.Log("Registering commands...");
+        commands = client.UseSlashCommands();
+
+        Logger.Log("Hooking command events...");
+        commands.SlashCommandErrored += EventHandler.OnCommandError;
+
+        commands.RegisterCommands<AddJoinRoleCommand>();
+        commands.RegisterCommands<AddPingRoleCommand>();
+        commands.RegisterCommands<AddSelectableRoleCommand>();
+        commands.RegisterCommands<AddTrackedRoleCommand>();
+        commands.RegisterCommands<RemoveJoinRoleCommand>();
+        commands.RegisterCommands<RemovePingRoleCommand>();
+        commands.RegisterCommands<RemoveSelectableRoleCommand>();
+        commands.RegisterCommands<RemoveTrackedRoleCommand>();
+        commands.RegisterCommands<PingCommand>();
+        commands.RegisterCommands<CreateRoleSelectorCommand>();
 
         Logger.Log("Connecting to Discord...");
         EventHandler.hasLoggedGuilds = false;

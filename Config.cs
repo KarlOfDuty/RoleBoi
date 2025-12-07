@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using YamlDotNet.Serialization;
 
-namespace MuteBoi;
+namespace RoleBoi;
 
 internal static class Config
 {
@@ -28,9 +28,9 @@ internal static class Config
 
   public static void LoadConfig()
   {
-    if (!string.IsNullOrEmpty(MuteBoi.commandLineArgs.configPath))
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.configPath))
     {
-      ConfigPath = MuteBoi.commandLineArgs.configPath;
+      ConfigPath = RoleBoi.commandLineArgs.configPath;
     }
 
     Logger.Log("Loading config \"" + Path.GetFullPath(ConfigPath) + "\"");
@@ -53,9 +53,9 @@ internal static class Config
     JObject json = JObject.Parse(serializer.Serialize(yamlObject));
 
     LogPath = json.SelectToken("bot.log-file")?.Value<string>() ?? "";
-    if (!string.IsNullOrEmpty(MuteBoi.commandLineArgs.logFilePath))
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.logFilePath))
     {
-      LogPath = MuteBoi.commandLineArgs.logFilePath;
+      LogPath = RoleBoi.commandLineArgs.logFilePath;
     }
 
     string stringLogLevel = json.SelectToken("bot.console-log-level")?.Value<string>() ?? "";

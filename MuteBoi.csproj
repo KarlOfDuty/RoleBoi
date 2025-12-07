@@ -2,25 +2,25 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>1.2.0</Version>
+    <Version>0.1.0</Version>
     <TargetFramework>net9.0</TargetFramework>
-    <AssemblyName>muteboi</AssemblyName>
-    <StartupObject>MuteBoi.MuteBoi</StartupObject>
+    <AssemblyName>roleboi</AssemblyName>
+    <StartupObject>RoleBoi.RoleBoi</StartupObject>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishSingleFile>true</PublishSingleFile>
     <TrimMode>partial</TrimMode>
     <DebugType>embedded</DebugType>
 
     <Authors>KarlofDuty</Authors>
-    <Description>A Discord bot made to stop users from simply rejoining a server when they get given a muted role.</Description>
+    <Description>A small role management Discord bot.</Description>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
-    <RepositoryUrl>https://github.com/KarlOfDuty/MuteBoi</RepositoryUrl>
+    <RepositoryUrl>https://github.com/KarlOfDuty/RoleBoi</RepositoryUrl>
 
     <PackageIconUrl>https://karlofduty.com/img/tardisIcon.jpg</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/KarlOfDuty/MuteBoi</PackageProjectUrl>
-    <PackageVersion>1.2.0</PackageVersion>
+    <PackageProjectUrl>https://github.com/KarlOfDuty/RoleBoi</PackageProjectUrl>
+    <PackageVersion>0.1.0</PackageVersion>
     <LangVersion>default</LangVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GitVersion>false</GitVersion>
@@ -33,6 +33,8 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="DSharpPlus" Version="4.5.1" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.1" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.1" />
     <PackageReference Include="EmbeddedBuildTime" Version="1.0.3" />
     <PackageReference Include="GitInfo" Version="3.3.5">
       <PrivateAssets>all</PrivateAssets>

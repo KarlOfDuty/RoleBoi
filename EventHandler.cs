@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
+using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.Attributes;
+using DSharpPlus.SlashCommands.EventArgs;
 
-namespace MuteBoi
+namespace RoleBoi
 {
   static class EventHandler
   {
@@ -39,7 +41,7 @@ namespace MuteBoi
 
       Logger.Log("Found Discord server: " + e.Guild.Name + " (" + e.Guild.Id + ")");
 
-      if (MuteBoi.commandLineArgs.serversToLeave.Contains(e.Guild.Id))
+      if (RoleBoi.commandLineArgs.serversToLeave.Contains(e.Guild.Id))
       {
         Logger.Warn("LEAVING DISCORD SERVER AS REQUESTED: " + e.Guild.Name + " (" + e.Guild.Id + ")");
         await e.Guild.LeaveAsync();
@@ -101,6 +103,132 @@ namespace MuteBoi
       }
 
       Database.TryRemoveRoles(e.Member.Id);
+    }
+
+
+    internal static Task OnCommandError(SlashCommandsExtension commandSystem, SlashCommandErrorEventArgs e)
+    {
+      switch (e.Exception)
+      {
+        case SlashExecutionChecksFailedException checksFailedException:
+        {
+          foreach (SlashCheckBaseAttribute attr in checksFailedException.FailedChecks)
+          {
+            DiscordEmbed error = new DiscordEmbedBuilder
+            {
+              Color = DiscordColor.Red,
+              Description = ParseFailedCheck(attr)
+            };
+            e.Context.CreateResponseAsync(error);
+          }
+          return Task.CompletedTask;
+        }
+        default:
+        {
+          Logger.Error("Exception occured: " + e.Exception.GetType(), e.Exception);
+          if (e.Exception is UnauthorizedException ex)
+          {
+            Logger.Error(ex.WebResponse.Response);
+          }
+
+          DiscordEmbed error = new DiscordEmbedBuilder
+          {
+            Color = DiscordColor.Red,
+            Description = "Internal error occured, please report this to the developer."
+          };
+          e.Context.CreateResponseAsync(error);
+          return Task.CompletedTask;
+        }
+      }
+    }
+
+    internal static async Task OnComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs e)
+    {
+      try
+      {
+        switch (e.Interaction.Data.ComponentType)
+        {
+          case ComponentType.StringSelect:
+            if (!e.Interaction.Data.CustomId.StartsWith("rolemanager_togglerole"))
+            {
+              return;
+            }
+
+            if (e.Interaction.Data.Values.Length == 0)
+            {
+              await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+                new DiscordInteractionResponseBuilder().WithContent(e.Message.Content).AddComponents(e.Message.Components));
+            }
+
+            foreach (string stringID in e.Interaction.Data.Values)
+            {
+              if (!ulong.TryParse(stringID, out ulong roleID) || roleID == 0) continue;
+
+              DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+              if (!e.Guild.Roles.ContainsKey(roleID) || member == null) continue;
+
+              if (member.Roles.Any(role => role.Id == roleID))
+              {
+                await member.RevokeRoleAsync(e.Guild.Roles[roleID]);
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                  new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
+                  {
+                    Color = DiscordColor.Green,
+                    Description = "Revoked role " + e.Guild.Roles[roleID].Mention + "!"
+                  }).AsEphemeral());
+              }
+              else
+              {
+                await member.GrantRoleAsync(e.Guild.Roles[roleID]);
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                  new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
+                  {
+                    Color = DiscordColor.Green,
+                    Description = "Granted role " + e.Guild.Roles[roleID].Mention + "!"
+                  }).AsEphemeral());
+              }
+            }
+            break;
+
+          case ComponentType.ActionRow:
+          case ComponentType.Button:
+          case ComponentType.FormInput:
+            return;
+        }
+      }
+      catch (UnauthorizedException)
+      {
+        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+          new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
+          {
+            Color = DiscordColor.Red,
+            Description = "The bot doesn't have the required permissions to do that!"
+          }).AsEphemeral());
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("Exception occured: " + ex.GetType(), ex);
+        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+          new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
+          {
+            Color = DiscordColor.Red,
+            Description = "Internal interaction error occured, please report this to the developer."
+          }).AsEphemeral());
+      }
+    }
+
+    private static string ParseFailedCheck(SlashCheckBaseAttribute attr)
+    {
+      return attr switch
+      {
+        SlashRequireDirectMessageAttribute _ => "This command can only be used in direct messages!",
+        SlashRequireOwnerAttribute _ => "Only the server owner can use that command!",
+        SlashRequirePermissionsAttribute _ => "You don't have permission to do that!",
+        SlashRequireBotPermissionsAttribute _ => "The bot doesn't have the required permissions to do that!",
+        SlashRequireUserPermissionsAttribute _ => "You don't have permission to do that!",
+        SlashRequireGuildAttribute _ => "This command has to be used in a Discord server!",
+        _ => "Unknown Discord API error occured, please try again later."
+      };
     }
   }
 }

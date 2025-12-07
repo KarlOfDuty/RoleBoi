@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace MuteBoi;
+namespace RoleBoi;
 
 public static class Extensions
 {

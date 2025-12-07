@@ -1,5 +1,13 @@
-# MuteBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/MuteBoi/job/main/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FMuteBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/MuteBoi.svg)](https://github.com/KarlOfDuty/MuteBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
-Retains specific Discord roles if users leave the server. Useful for muted roles or other permission negating roles. Leaving members are saved in a mysql database with all tracked roles they had when they left.
+# RoleBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/MuteBoi/job/main/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FMuteBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/MuteBoi.svg)](https://github.com/KarlOfDuty/MuteBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
+
+This is a small Discord bot that helps with simple role management. It features functions to:
+
+- Grant roles to all users when they join the Discord server.
+- Track roles when users leave and give them back when they rejoin the server. This is useful for permission negating roles such as a "Muted" role.
+- Create a selection box that users can use to grant roles to themselves.
+- A ping command that moderators can use to ping roles that are normally un-pingable.
+
+All of these functions are completely independent of each other and can be completely turned off by simply turning the related commands off in the Discord settings.
 
 ## Setup
 
@@ -11,6 +19,15 @@ Retains specific Discord roles if users leave the server. Useful for muted roles
 
 4. Set up the config (`config.yml`) to your specifications, there are instructions inside and also further down on this page. If you need more help either contact me in Discord or through an issue here.
 
+## Commands
+| Command                                                                                                               | Description                                                                                                       |
+|-----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| `/addjoinrole <role>`<br>`/addtrackedrole <role>`<br>`/addselectablerole <role>`<br>`/addpingrole <role>`             | Adds a role to their respective list.                                                                             |
+| `/listjoinrole <role>`<br>`/listtrackedrole <role>`<br>`/listselectablerole <role>`<br>`/listpingrole <role>`         | Lists the roles in their respective list.                                                                         |
+| `/removejoinrole <role>`<br>`/removetrackedrole <role>`<br>`/removeselectablerole <role>`<br>`/removepingrole <role>` | Removes a role from their respective list.                                                                        |
+| `/createroleselector`                                                                                                 | Creates a role selector message which users can use to join any role added with the `/addselectablerole` command. |
+| `/ping <role>`                                                                                                        | Pings a role added with `/addpingrole` even if it would normally be un-pingable by the user.                      |
+
 ### Config:
 
 ```yaml
@@ -21,18 +38,6 @@ bot:
   # Decides which messages are shown in console
   # Possible values are: Critical, Error, Warning, Information, Debug.
   console-log-level: "Information"
-
-  # A list of role ids that should be tracked
-  tracked-roles:
-    - 111111111111111111
-    - 222222222222222222
-    - 333333333333333333
-
-  # Always give these roles to everyone who joins, regardless of if they have been on the server before or not.
-  everyone-roles:
-    - 111111111111111111
-    - 222222222222222222
-    - 333333333333333333
 
   # Sets the type of activity for the bot to display in its presence status
   # Possible values are: Playing, Streaming, ListeningTo, Watching, Competing
@@ -46,15 +51,6 @@ bot:
   # The log file will still log all log levels regardless of the console log level setting.
   log-file: ""
 
-database:
-  # Address and port of the mysql server
-  address: "127.0.0.1"
-  port: 3306
-
-  # Name of the database to use
-  name: "muteboi"
-
-  # Username and password for authentication
-  user: ""
-  password: ""
+  # Path to where sqlite database file is saved.
+  database-file: "./roleboi.db"
 ```
