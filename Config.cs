@@ -17,7 +17,7 @@ internal static class Config
 
   internal static string hostName = "127.0.0.1";
   internal static int    port     = 3306;
-  internal static string database = "muteboi";
+  internal static string database = "roleboi";
   internal static string username = "";
   internal static string password = "";
 

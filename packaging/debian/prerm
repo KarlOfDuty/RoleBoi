@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for muteboi.
+# prerm script for roleboi.
 #
 # See: dh_installdeb(1).
 
@@ -19,19 +19,19 @@ set -e
 
 case "$1" in
   upgrade|deconfigure)
-    if systemctl -q is-active muteboi.service; then
-      systemctl stop muteboi.service
-      touch "/tmp/.muteboi-upgrade-stopped-service"
+    if systemctl -q is-active roleboi.service; then
+      systemctl stop roleboi.service
+      touch "/tmp/.roleboi-upgrade-stopped-service"
     fi
   ;;
 
   remove)
-    if systemctl -q is-enabled muteboi.service; then
-      systemctl disable muteboi.service
+    if systemctl -q is-enabled roleboi.service; then
+      systemctl disable roleboi.service
     fi
 
-    if systemctl -q is-active muteboi.service; then
-      systemctl stop muteboi.service
+    if systemctl -q is-active roleboi.service; then
+      systemctl stop roleboi.service
     fi
   ;;
 

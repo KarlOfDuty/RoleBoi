@@ -1,1 +1,1 @@
-u muteboi - "MuteBoi service user" /var/lib/muteboi /usr/bin/nologin
+u roleboi - "RoleBoi service user" /var/lib/roleboi /usr/bin/nologin

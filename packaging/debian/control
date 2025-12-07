@@ -6,9 +6,9 @@ Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
 Standards-Version: 4.6.2
-Homepage: https://github.com/KarlOfDuty/MuteBoi
-Vcs-Browser: https://github.com/KarlOfDuty/MuteBoi
-Vcs-Git: https://github.com/KarlOfDuty/MuteBoi.git
+Homepage: https://github.com/KarlOfDuty/RoleBoi
+Vcs-Browser: https://github.com/KarlOfDuty/RoleBoi
+Vcs-Git: https://github.com/KarlOfDuty/RoleBoi.git
 
 Package: PACKAGE_NAME
 Architecture: amd64
@@ -18,5 +18,5 @@ Depends:
  mariadb-server,
  ${shlibs:Depends},
  ${misc:Depends},
-Description: Retains specific Discord roles if users leave and rejoin the server. Useful for muted roles or other permission negating roles.
-Conflicts: muteboi, muteboi-dev
+Description: A small role management Discord bot.
+Conflicts: roleboi, roleboi-dev

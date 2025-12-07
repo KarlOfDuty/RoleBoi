@@ -1,20 +1,20 @@
-% muteboi(1) | User Commands
+% roleboi(1) | User Commands
 %
 % "2025-05-25"
 
 # NAME
 
-muteboi - Retains specific Discord roles if users rejoin the server.
+roleboi - Retains specific Discord roles if users rejoin the server.
 
 # SYNOPSIS
 
-**muteboi** [**-c** *CONFIG*] [**-l** *PATH*] [**--leave**=*ID,ID,...*]  
-**muteboi** [**-h** | **--help**]  
-**muteboi** [**-v** | **--version**]
+**roleboi** [**-c** *CONFIG*] [**-l** *PATH*] [**--leave**=*ID,ID,...*]  
+**roleboi** [**-h** | **--help**]  
+**roleboi** [**-v** | **--version**]
 
 # DESCRIPTION
 
-**muteboi** retains specific Discord roles if users rejoin the server.
+**roleboi** retains specific Discord roles if users rejoin the server.
 Useful for muted roles or other permission negating roles.
 Leaving members are saved in a mysql database with all tracked roles they had when they left.
 
@@ -54,10 +54,10 @@ Requirements:
 
 # FILES
 
-*/etc/muteboi/config.yml*
+*/etc/roleboi/config.yml*
 :   System-wide configuration file, used when running as a service.
 
-*/var/log/muteboi/muteboi.log*
+*/var/log/roleboi/roleboi.log*
 :   System-wide log file, used when running as a service.
 
 # EXIT STATUS
@@ -70,23 +70,23 @@ Requirements:
 
 Start the bot with the configuration file and transcripts in the current working directory:
 
-    muteboi
+    roleboi
 
 Specify a custom configuration file and transcripts directory:
 
-    muteboi --config /path/to/config.yml --transcripts /path/to/transcripts
+    roleboi --config /path/to/config.yml --transcripts /path/to/transcripts
 
-Run the bot as the muteboi user using default system paths:
+Run the bot as the roleboi user using default system paths:
 
-    sudo -u "muteboi" muteboi --config /etc/muteboi/config.yml
+    sudo -u "roleboi" roleboi --config /etc/roleboi/config.yml
 
 Start the bot using the included systemd service:
 
-    sudo systemctl start muteboi
+    sudo systemctl start roleboi
 
 Make the bot leave specific servers:
 
-    muteboi --leave 123456789012345678,987654321098765432
+    roleboi --leave 123456789012345678,987654321098765432
 
 # COPYRIGHT
 
@@ -102,7 +102,7 @@ Otherwise, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 # BUGS
 
 Report bugs at the project's issue tracker:  
-<https://github.com/KarlOfDuty/MuteBoi/issues>
+<https://github.com/KarlOfDuty/RoleBoi/issues>
 
 # AUTHOR
 

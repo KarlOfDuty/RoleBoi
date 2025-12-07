@@ -18,9 +18,9 @@ pipeline
           env.DOTNET_CLI_HOME = "/tmp/.dotnet"
           env.DEBEMAIL="xkaess22@gmail.com"
           env.DEBFULLNAME="Karl Essinger"
-          //env.AUR_GIT_PACKAGE="muteboi-git"
+          //env.AUR_GIT_PACKAGE="roleboi-git"
           env.DEV_BUILD = params.BUILD_TYPE == 'dev' ? "true" : "false"
-          env.PACKAGE_NAME = params.BUILD_TYPE == 'dev' ? "muteboi-dev" : "muteboi"
+          env.PACKAGE_NAME = params.BUILD_TYPE == 'dev' ? "roleboi-dev" : "roleboi"
           env.RPMBUILD_ARGS = params.BUILD_TYPE == 'dev' ? "--define 'dev_build true'" : ""
 
           common = load("${env.WORKSPACE}/ci-utilities/scripts/common.groovy")
@@ -40,7 +40,7 @@ pipeline
       {
         script
         {
-          common.verify_release_does_not_exist("KarlOfDuty/MuteBoi", params.RELEASE_VERSION)
+          common.verify_release_does_not_exist("KarlOfDuty/RoleBoi", params.RELEASE_VERSION)
         }
       }
     }
@@ -61,7 +61,7 @@ pipeline
       {
         script
         {
-          common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/muteboi-git.pkgbuild", "packaging/muteboi.install")
+          common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/roleboi-git.pkgbuild", "packaging/roleboi.install")
         }
       }
     } */
@@ -74,14 +74,14 @@ pipeline
           steps
           {
             sh 'dotnet publish -r linux-x64 -c Release -p:PublishTrimmed=true --self-contained true --no-restore --output linux-x64/'
-            sh 'mv linux-x64/muteboi linux-x64/muteboi-sc'
+            sh 'mv linux-x64/roleboi linux-x64/roleboi-sc'
             sh 'dotnet publish -r linux-x64 -c Release --self-contained false --no-restore --output linux-x64/'
-            archiveArtifacts(artifacts: 'linux-x64/muteboi', caseSensitive: true)
-            archiveArtifacts(artifacts: 'linux-x64/muteboi-sc', caseSensitive: true)
+            archiveArtifacts(artifacts: 'linux-x64/roleboi', caseSensitive: true)
+            archiveArtifacts(artifacts: 'linux-x64/roleboi-sc', caseSensitive: true)
             script
             {
-              env.BASIC_LINUX_PATH = 'linux-x64/muteboi'
-              env.BASIC_LINUX_SC_PATH = 'linux-x64/muteboi-sc'
+              env.BASIC_LINUX_PATH = 'linux-x64/roleboi'
+              env.BASIC_LINUX_SC_PATH = 'linux-x64/roleboi-sc'
             }
           }
         }
@@ -90,14 +90,14 @@ pipeline
           steps
           {
             sh 'dotnet publish -r win-x64 -c Release -p:PublishTrimmed=true --self-contained true --no-restore --output windows-x64/'
-            sh 'mv windows-x64/muteboi.exe windows-x64/muteboi-sc.exe'
+            sh 'mv windows-x64/roleboi.exe windows-x64/roleboi-sc.exe'
             sh 'dotnet publish -r win-x64 -c Release --self-contained false --no-restore --output windows-x64/'
-            archiveArtifacts(artifacts: 'windows-x64/muteboi.exe', caseSensitive: true)
-            archiveArtifacts(artifacts: 'windows-x64/muteboi-sc.exe', caseSensitive: true)
+            archiveArtifacts(artifacts: 'windows-x64/roleboi.exe', caseSensitive: true)
+            archiveArtifacts(artifacts: 'windows-x64/roleboi-sc.exe', caseSensitive: true)
             script
             {
-              env.BASIC_WINDOWS_PATH = 'windows-x64/muteboi.exe'
-              env.BASIC_WINDOWS_SC_PATH = 'windows-x64/muteboi-sc.exe'
+              env.BASIC_WINDOWS_PATH = 'windows-x64/roleboi.exe'
+              env.BASIC_WINDOWS_SC_PATH = 'windows-x64/roleboi-sc.exe'
             }
           }
         }
@@ -109,7 +109,7 @@ pipeline
           {
             script
             {
-              common.build_rpm_package(env.DISTRO, "packaging/muteboi.spec", env.PACKAGE_NAME, env.RPMBUILD_ARGS)
+              common.build_rpm_package(env.DISTRO, "packaging/roleboi.spec", env.PACKAGE_NAME, env.RPMBUILD_ARGS)
               env.RHEL_RPM_NAME = sh(script: "cd ${env.DISTRO} && ls ${env.PACKAGE_NAME}-*.x86_64.rpm", returnStdout: true).trim()
               env.RHEL_RPM_PATH = "${env.DISTRO}/${env.RHEL_RPM_NAME}"
               env.RHEL_SRPM_NAME = sh(script: "cd ${env.DISTRO} && ls ${env.PACKAGE_NAME}-*.src.rpm", returnStdout: true).trim()
@@ -126,7 +126,7 @@ pipeline
           {
             script
             {
-              common.build_rpm_package(env.DISTRO, "packaging/muteboi.spec", env.PACKAGE_NAME, env.RPMBUILD_ARGS)
+              common.build_rpm_package(env.DISTRO, "packaging/roleboi.spec", env.PACKAGE_NAME, env.RPMBUILD_ARGS)
               env.FEDORA_RPM_NAME = sh(script: "cd ${env.DISTRO} && ls ${env.PACKAGE_NAME}-*.x86_64.rpm", returnStdout: true).trim()
               env.FEDORA_RPM_PATH = "${env.DISTRO}/${env.FEDORA_RPM_NAME}"
               env.FEDORA_SRPM_NAME = sh(script: "cd ${env.DISTRO} && ls ${env.PACKAGE_NAME}-*.src.rpm", returnStdout: true).trim()
@@ -325,10 +325,10 @@ pipeline
           ]
 
           currentBuild.description = params.BUILD_TYPE == 'pre-release' ? "Pre-release ${env.RELEASE_VERSION}" : "Release ${env.RELEASE_VERSION}"
-          common.create_github_release("KarlOfDuty/MuteBoi", params.RELEASE_VERSION, artifacts, params.BUILD_TYPE == 'pre-release')
+          common.create_github_release("KarlOfDuty/RoleBoi", params.RELEASE_VERSION, artifacts, params.BUILD_TYPE == 'pre-release')
 
           // Update AUR version after the tag is created
-          //common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/muteboi-git.pkgbuild", "packaging/muteboi.install")
+          //common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/roleboi-git.pkgbuild", "packaging/roleboi.install")
         }
       }
     }

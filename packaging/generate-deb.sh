@@ -14,13 +14,13 @@ if [[ -z "$DEBEMAIL" || -z "$DEBEMAIL" ]]; then
 fi
 
 # Set up package version and name depending on whether this is a dev build or release
-BASE_VERSION="$(sed -ne '/Version/{s/.*<Version>\(.*\)<\/Version>.*/\1/p;q;}' < MuteBoi.csproj)"
+BASE_VERSION="$(sed -ne '/Version/{s/.*<Version>\(.*\)<\/Version>.*/\1/p;q;}' < RoleBoi.csproj)"
 if [[ "$DEV_BUILD" == "false" ]]; then
   PACKAGE_VERSION="$BASE_VERSION"
-  PACKAGE_NAME="muteboi"
+  PACKAGE_NAME="roleboi"
 else
   PACKAGE_VERSION="$BASE_VERSION~$(date "+%Y%m%d%H%M%S")git$(git rev-parse --short HEAD)"
-  PACKAGE_NAME="muteboi-dev"
+  PACKAGE_NAME="roleboi-dev"
 fi
 
 case "$DISTRO" in

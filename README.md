@@ -1,4 +1,4 @@
-# RoleBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/MuteBoi/job/main/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FMuteBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/MuteBoi.svg)](https://github.com/KarlOfDuty/MuteBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
+# RoleBoi [![Build Status](https://jenkins.karlofduty.com/job/DiscordBots/job/RoleBoi/job/main/badge/icon)](https://jenkins.karlofduty.com/blue/organizations/jenkins/DiscordBots%2FRoleBoi/activity) [![Release](https://img.shields.io/github/release/KarlofDuty/RoleBoi.svg)](https://github.com/KarlOfDuty/RoleBoi/releases) [![Discord Server](https://img.shields.io/discord/430468637183442945.svg?label=discord)](https://discord.gg/C5qMvkj)
 
 This is a small Discord bot that helps with simple role management. It features functions to:
 
@@ -13,7 +13,7 @@ All of these functions are completely independent of each other and can be compl
 
 1. [Create a new bot application](https://discordpy.readthedocs.io/en/latest/discord.html).
 
-2. Download the bot executable for your operating system, either a [release version](https://github.com/KarlOfDuty/MuteBoi/releases) or a [dev build](http://95.217.45.17:8080/blue/organizations/jenkins/MuteBoi/activity). The bot should include dotnet but if your bot doesnt work and this seems to be the issue please tell me.
+2. Download the bot executable for your operating system, either a [release version](https://github.com/KarlOfDuty/RoleBoi/releases) or a [dev build](http://95.217.45.17:8080/blue/organizations/jenkins/RoleBoi/activity). The bot should include dotnet but if your bot doesnt work and this seems to be the issue please tell me.
 
 3. Run the bot executable once to generate the config.
 
@@ -47,10 +47,11 @@ bot:
   presence-text: "Discord"
 
   # Log all console output to a file, can be overridden using command line arguments. Set to "" to disable.
-  # When running the bot as a service this will be set to "/var/log/muteboi/muteboi.log" by the service.
+  # When running the bot as a service this will be set to "/var/log/roleboi/roleboi.log" by the service.
   # The log file will still log all log levels regardless of the console log level setting.
   log-file: ""
 
-  # Path to where sqlite database file is saved.
+  # Path to where the sqlite database file is saved.
+  # When running the bot as a service this will be set to "/var/lib/roleboi/roleboi.db" by the service.
   database-file: "./roleboi.db"
 ```

@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Source: https://github.com/KarlOfDuty/MuteBoi
-Upstream-Name: muteboi
+Source: https://github.com/KarlOfDuty/RoleBoi
+Upstream-Name: roleboi
 Upstream-Contact: Karl Essinger <xkaess22@gmail.com>
 
 Files:
