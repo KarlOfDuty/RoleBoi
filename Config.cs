@@ -15,11 +15,7 @@ internal static class Config
   internal static string presenceType = "Playing";
   internal static string presenceText = "";
 
-  internal static string hostName = "127.0.0.1";
-  internal static int    port     = 3306;
-  internal static string database = "roleboi";
-  internal static string username = "";
-  internal static string password = "";
+  internal static string databaseFile = "./roleboi.db";
 
   public static string ConfigPath { get; private set; } = "./config.yml";
   public static string LogPath { get; private set; } = "";
@@ -67,17 +63,11 @@ internal static class Config
     Logger.SetLogLevel(logLevel);
 
     token = json.SelectToken("bot.token")?.Value<string>() ?? "";
-    trackedRoles = json.SelectToken("bot.tracked-roles")?.Value<JArray>().Values<ulong>().ToArray();
-    everyoneRoles = json.SelectToken("bot.everyone-roles")?.Value<JArray>().Values<ulong>().ToArray();
+    trackedRoles = json.SelectToken("bot.tracked-roles")?.Value<JArray>().Values<ulong>().ToArray() ?? []; //TODO: Read these from database instead
+    everyoneRoles = json.SelectToken("bot.everyone-roles")?.Value<JArray>().Values<ulong>().ToArray() ?? []; //TODO: Read these from database instead
     presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
     presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
-
-    // Reads database info
-    hostName = json.SelectToken("database.address")?.Value<string>() ?? "";
-    port = json.SelectToken("database.port")?.Value<int>() ?? 3306;
-    database = json.SelectToken("database.name")?.Value<string>() ?? "";
-    username = json.SelectToken("database.user")?.Value<string>() ?? "";
-    password = json.SelectToken("database.password")?.Value<string>() ?? "";
+    databaseFile = json.SelectToken("bot.database-file")?.Value<string>() ?? "./roleboi.db";
 
     Initialized = true;
   }

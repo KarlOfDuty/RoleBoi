@@ -1,65 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
-using MySqlConnector;
+using Microsoft.Data.Sqlite;
 
 namespace RoleBoi
 {
   internal static class Database
   {
-    private static string connectionString = "";
-
     public class SavedRole
     {
       public ulong userID;
       public ulong roleID;
       public DateTime time;
 
-      public SavedRole(MySqlDataReader reader)
+      public SavedRole(SqliteDataReader reader)
       {
-        this.userID = reader.GetUInt64("user_id");
-        this.roleID = reader.GetUInt64("role_id");
-        this.time = reader.GetDateTime("time");
+        userID = (ulong)reader.GetInt64(reader.GetOrdinal("user_id"));
+        roleID = (ulong)reader.GetInt64(reader.GetOrdinal("role_id"));
+        time = DateTime.Parse(reader.GetString(reader.GetOrdinal("time")));
       }
     }
 
-    public static void SetConnectionString(string host, int port, string database, string username, string password)
+    public static SqliteConnection GetConnection()
     {
-      connectionString = "server=" + host +
-                         ";database=" + database +
-                         ";port=" + port +
-                         ";userid=" + username +
-                         ";password=" + password;
-    }
-
-    public static MySqlConnection GetConnection()
-    {
-      return new MySqlConnection(connectionString);
+      return new SqliteConnection("Data Source=" + Config.databaseFile + ";Cache=Shared");
     }
 
     public static void SetupTables()
     {
-      using MySqlConnection c = GetConnection();
+      using SqliteConnection c = GetConnection();
 
       c.Open();
-      using MySqlCommand createTable = new MySqlCommand(
+      using SqliteCommand createTable = new SqliteCommand(
                 "CREATE TABLE IF NOT EXISTS tracked_roles(" +
-                "user_id BIGINT UNSIGNED NOT NULL," +
-                "role_id BIGINT UNSIGNED NOT NULL," +
-                "time DATETIME NOT NULL," +
-                "INDEX(user_id, time))",
+                "user_id INTEGER NOT NULL," +
+                "role_id INTEGER NOT NULL," +
+                "time TEXT NOT NULL);",
                 c);
       createTable.ExecuteNonQuery();
     }
 
     public static bool TryAddRole(ulong userID, ulong roleID)
     {
-      using MySqlConnection c = GetConnection();
+      using SqliteConnection c = GetConnection();
       c.Open();
 
-      using MySqlCommand cmd = new MySqlCommand(@"INSERT INTO tracked_roles (user_id, role_id, time) VALUES (@user_id, @role_id, now());", c);
-      cmd.Parameters.AddWithValue("@user_id", userID);
-      cmd.Parameters.AddWithValue("@role_id", roleID);
-      cmd.Prepare();
+      using SqliteCommand cmd = new SqliteCommand(@"INSERT INTO tracked_roles (user_id, role_id, time) VALUES (@user_id, @role_id, CURRENT_TIMESTAMP);", c);
+      cmd.Parameters.AddWithValue("@user_id", (long)userID);
+      cmd.Parameters.AddWithValue("@role_id", (long)roleID);
 
       return cmd.ExecuteNonQuery() > 0;
     }
@@ -67,13 +54,12 @@ namespace RoleBoi
     public static bool TryGetRoles(ulong userID, out List<SavedRole> roles)
     {
       roles = null;
-      using MySqlConnection c = GetConnection();
+      using SqliteConnection c = GetConnection();
       c.Open();
 
-      using MySqlCommand selection = new MySqlCommand(@"SELECT * FROM tracked_roles WHERE user_id=@user_id", c);
-      selection.Parameters.AddWithValue("@user_id", userID);
-      selection.Prepare();
-      MySqlDataReader results = selection.ExecuteReader();
+      using SqliteCommand selection = new SqliteCommand(@"SELECT user_id, role_id, time FROM tracked_roles WHERE user_id=@user_id", c);
+      selection.Parameters.AddWithValue("@user_id", (long)userID);
+      SqliteDataReader results = selection.ExecuteReader();
 
       if (!results.Read())
       {
@@ -91,13 +77,12 @@ namespace RoleBoi
 
     public static bool TryRemoveRoles(ulong userID)
     {
-      using (MySqlConnection c = GetConnection())
+      using (SqliteConnection c = GetConnection())
       {
         c.Open();
 
-        using MySqlCommand deletion = new MySqlCommand(@"DELETE FROM tracked_roles WHERE user_id=@user_id", c);
-        deletion.Parameters.AddWithValue("@user_id", userID);
-        deletion.Prepare();
+        using SqliteCommand deletion = new SqliteCommand(@"DELETE FROM tracked_roles WHERE user_id=@user_id", c);
+        deletion.Parameters.AddWithValue("@user_id", (long)userID);
 
         return deletion.ExecuteNonQuery() > 0;
       }

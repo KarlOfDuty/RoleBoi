@@ -206,13 +206,12 @@ internal static class RoleBoi
         // Database connection and setup
         try
         {
-            Logger.Log("Connecting to database. (" + Config.hostName + ":" + Config.port + ")");
-            Database.SetConnectionString(Config.hostName, Config.port, Config.database, Config.username, Config.password);
+            Logger.Log("Opening database file: " + Path.GetFullPath(Config.databaseFile));
             Database.SetupTables();
         }
         catch (Exception e)
         {
-            Logger.Fatal("Could not set up database tables, please confirm connection settings, status of the server and permissions of MySQL user.", e);
+            Logger.Fatal("Could not set up database tables, please confirm the database file path and file permissions.", e);
             return false;
         }
         return true;
@@ -246,7 +245,7 @@ internal static class RoleBoi
         Logger.Log("Hooking command events...");
         commands.SlashCommandErrored += EventHandler.OnCommandError;
 
-        commands.RegisterCommands<AddJoinRoleCommand>();
+        /*commands.RegisterCommands<AddJoinRoleCommand>();
         commands.RegisterCommands<AddPingRoleCommand>();
         commands.RegisterCommands<AddSelectableRoleCommand>();
         commands.RegisterCommands<AddTrackedRoleCommand>();
@@ -255,7 +254,7 @@ internal static class RoleBoi
         commands.RegisterCommands<RemoveSelectableRoleCommand>();
         commands.RegisterCommands<RemoveTrackedRoleCommand>();
         commands.RegisterCommands<PingCommand>();
-        commands.RegisterCommands<CreateRoleSelectorCommand>();
+        commands.RegisterCommands<CreateRoleSelectorCommand>();*/
 
         Logger.Log("Connecting to Discord...");
         EventHandler.hasLoggedGuilds = false;

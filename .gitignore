@@ -351,3 +351,5 @@ MigrationBackup/
 
 .idea/
 config.yml
+
+roleboi.db
