@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -14,8 +13,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
-using RoleBoi.Commands;
-using RoleManager.Commands;
 using Tmds.Systemd;
 using ServiceState = Tmds.Systemd.ServiceState;
 
@@ -135,9 +132,19 @@ internal static class RoleBoi
                     {
                         case PosixSignal.SIGHUP:
                             // Tmds.Systemd.ServiceManager doesn't support the notify-reload service type so we have to send the reloading message manually.
-                            // According to the documentation this shouldn't be the right way to calculate MONOTONIC_USEC, but it works for some reason.
-                            byte[] data = System.Text.Encoding.UTF8.GetBytes($"RELOADING=1\nMONOTONIC_USEC={DateTimeOffset.UtcNow.ToUnixTimeMicroseconds()}\n");
-                            UnixDomainSocketEndPoint ep = new(systemdSocket);
+
+                            // Handle Linux abstract UDS: systemd encodes abstract sockets with a leading '@' which must be
+                            // translated to a leading NUL ("\0") when constructing UnixDomainSocketEndPoint.
+                            string notifySock = systemdSocket;
+                            if (notifySock[0] == '@')
+                            {
+                                notifySock = "\0" + notifySock.Substring(1);
+                            }
+                            UnixDomainSocketEndPoint ep = new(notifySock);
+
+                            // Use CLOCK_MONOTONIC for MONOTONIC_USEC as per sd_notify documentation.
+                            byte[] data = System.Text.Encoding.UTF8.GetBytes($"RELOADING=1\nMONOTONIC_USEC={Utilities.GetMonotonicUsec()}\n");
+
                             using (Socket cl = new(AddressFamily.Unix, SocketType.Dgram, ProtocolType.Unspecified))
                             {
                                 await cl.ConnectAsync(ep);
