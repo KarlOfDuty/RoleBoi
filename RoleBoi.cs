@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Channels;
+using System.Linq; // Needed in dotnet 9.0 sdk
 using DSharpPlus;
 using CommandLine;
 using DSharpPlus.Entities;
