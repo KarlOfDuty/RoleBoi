@@ -63,9 +63,10 @@ namespace RoleBoi
 
     public static Task OnGuildMemberRemoved(DiscordClient _, GuildMemberRemoveEventArgs e)
     {
+      List<ulong> trackedRoles = Database.GetTrackedRoles();
       foreach (DiscordRole role in e.Member.Roles)
       {
-        if (Config.trackedRoles.Contains(role.Id))
+        if (trackedRoles.Contains(role.Id))
         {
           Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") left the server with tracked role '" + role.Name + "'.");
           Database.TryAddUserRole(e.Member.Id, role.Id);
@@ -76,7 +77,8 @@ namespace RoleBoi
 
     public static async Task OnGuildMemberAdded(DiscordClient _, GuildMemberAddEventArgs e)
     {
-      foreach (ulong roleID in Config.everyoneRoles)
+      List<ulong> joinRoles = Database.GetJoinRoles();
+      foreach (ulong roleID in joinRoles)
       {
         try
         {

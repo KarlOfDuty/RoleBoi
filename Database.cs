@@ -88,5 +88,51 @@ namespace RoleBoi
                                    new() { { "@user_id", (long)userID } });
       return result > 0;
     }
+
+    private static bool TryAddConfigRole(string table, ulong roleID)
+    {
+      int result = ExecuteNonQuery($"INSERT INTO {table} (role_id) VALUES (@role_id);",
+                                   new() { { "@role_id", (long)roleID } });
+      return result > 0;
+    }
+
+    private static bool TryRemoveConfigRole(string table, ulong roleID)
+    {
+      int result = ExecuteNonQuery($"DELETE FROM {table} WHERE role_id=@role_id;",
+                                   new() { { "@role_id", (long)roleID } });
+      return result > 0;
+    }
+
+    private static List<ulong> GetConfigRoles(string table)
+    {
+      using SqliteConnection c = GetConnection();
+      c.Open();
+
+      using SqliteCommand selection = new SqliteCommand($"SELECT role_id FROM {table};", c);
+      using SqliteDataReader reader = selection.ExecuteReader();
+
+      List<ulong> roles = new List<ulong>();
+      while (reader.Read())
+      {
+        roles.Add((ulong)reader.GetInt64(reader.GetOrdinal("role_id")));
+      }
+      return roles;
+    }
+
+    public static bool TryAddTrackedRole(ulong roleID) => TryAddConfigRole("config_tracked_roles", roleID);
+    public static bool TryRemoveTrackedRole(ulong roleID) => TryRemoveConfigRole("config_tracked_roles", roleID);
+    public static List<ulong> GetTrackedRoles() => GetConfigRoles("config_tracked_roles");
+
+    public static bool TryAddPingableRole(ulong roleID) => TryAddConfigRole("config_pingable_roles", roleID);
+    public static bool TryRemovePingableRole(ulong roleID) => TryRemoveConfigRole("config_pingable_roles", roleID);
+    public static List<ulong> GetPingableRoles() => GetConfigRoles("config_pingable_roles");
+
+    public static bool TryAddSelectableRole(ulong roleID) => TryAddConfigRole("config_selectable_roles", roleID);
+    public static bool TryRemoveSelectableRole(ulong roleID) => TryRemoveConfigRole("config_selectable_roles", roleID);
+    public static List<ulong> GetSelectableRoles() => GetConfigRoles("config_selectable_roles");
+
+    public static bool TryAddJoinRole(ulong roleID) => TryAddConfigRole("config_join_roles", roleID);
+    public static bool TryRemoveJoinRole(ulong roleID) => TryRemoveConfigRole("config_join_roles", roleID);
+    public static List<ulong> GetJoinRoles() => GetConfigRoles("config_join_roles");
   }
 }

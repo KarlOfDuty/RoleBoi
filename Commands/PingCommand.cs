@@ -14,7 +14,7 @@ public class PingCommand : ApplicationCommandModule
   [SlashCommand("ping", "Mentions a Discord role registered with the bot.")]
   public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to mention.")] DiscordRole role)
   {
-    if (Roles.savedRoles.All(savedRole => savedRole != role.Id))
+    if (Database.GetPingableRoles().All(savedRole => savedRole != role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
