@@ -9,37 +9,33 @@ namespace RoleBoi.Commands;
 public class AddPingRoleCommand : ApplicationCommandModule
 {
   [SlashRequireGuild]
-  [SlashCommand("addrole", "Adds a Discord role to the bot")]
-  public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to add.")] DiscordRole role)
+  [SlashCommand("addpingrole", "Allow a role to be mentioned via /ping.")]
+  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to add.")] DiscordRole role)
   {
-    // TODO: Update for RoleBoi
-
-    if (Roles.savedRoles.Any(savedRole => savedRole == role.Id))
+    if (Database.GetPingableRoles().Any(r => r == role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role is already enabled."
+        Description = "That role is already pingable."
       }, true);
       return;
     }
 
-    if (!command.Guild.Roles.ContainsKey(role.Id))
+    if (!Database.TryAddPingableRole(role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role doesn't exist."
+        Description = "Failed to add pingable role."
       }, true);
       return;
     }
-
-    Roles.AddRole(role.Id);
 
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
-      Description = "Role added."
+      Description = "Pingable role added."
     }, true);
   }
 }

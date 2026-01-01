@@ -6,7 +6,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using RoleBoi;
 
-namespace RoleManager.Commands;
+namespace RoleBoi.Commands;
 
 public class PingCommand : ApplicationCommandModule
 {
@@ -24,6 +24,7 @@ public class PingCommand : ApplicationCommandModule
       return;
     }
 
-    await command.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(role.Mention).AddMentions(Mentions.All));
+    await command.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                      new DiscordInteractionResponseBuilder().WithContent(role.Mention).AddMentions(Mentions.All));
   }
 }

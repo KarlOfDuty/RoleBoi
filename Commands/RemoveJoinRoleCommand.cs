@@ -5,42 +5,38 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using RoleBoi;
 
-namespace RoleManager.Commands;
+namespace RoleBoi.Commands;
 
 public class RemoveJoinRoleCommand : ApplicationCommandModule
 {
   [SlashRequireGuild]
-  [SlashCommand("removerole", "Removes a Discord role from the bot")]
-  public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to remove.")] DiscordRole role)
+  [SlashCommand("removejoinrole", "Remove a role from being assigned to everyone who joins.")]
+  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to remove.")] DiscordRole role)
   {
-    // TODO: Update for RoleBoi
-
-    if (Roles.savedRoles.All(savedRole => savedRole != role.Id))
+    if (Database.GetJoinRoles().All(r => r != role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role is already disabled."
+        Description = "That role is not configured as a join role."
       }, true);
       return;
     }
 
-    if (!command.Guild.Roles.ContainsKey(role.Id))
+    if (!Database.TryRemoveJoinRole(role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role doesn't exist."
+        Description = "Failed to remove join role."
       }, true);
       return;
     }
-
-    Roles.RemoveRole(role.Id);
 
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
-      Description = "Role removed."
+      Description = "Join role removed."
     }, true);
   }
 }

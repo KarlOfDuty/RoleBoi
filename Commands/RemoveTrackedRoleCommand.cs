@@ -5,42 +5,38 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using RoleBoi;
 
-namespace RoleManager.Commands;
+namespace RoleBoi.Commands;
 
 public class RemoveTrackedRoleCommand : ApplicationCommandModule
 {
   [SlashRequireGuild]
-  [SlashCommand("removerole", "Removes a Discord role from the bot")]
-  public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to remove.")] DiscordRole role)
+  [SlashCommand("removetrackedrole", "Stop tracking members with this role rejoining.")]
+  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to remove.")] DiscordRole role)
   {
-    // TODO: Update for RoleBoi
-
-    if (Roles.savedRoles.All(savedRole => savedRole != role.Id))
+    if (Database.GetTrackedRoles().All(r => r != role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role is already disabled."
+        Description = "That role is not tracked."
       }, true);
       return;
     }
 
-    if (!command.Guild.Roles.ContainsKey(role.Id))
+    if (!Database.TryRemoveTrackedRole(role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role doesn't exist."
+        Description = "Failed to remove tracked role."
       }, true);
       return;
     }
-
-    Roles.RemoveRole(role.Id);
 
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
-      Description = "Role removed."
+      Description = "Tracked role removed."
     }, true);
   }
 }

@@ -30,8 +30,9 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
 
   public static async Task<List<DiscordSelectComponent>> GetSelectComponents(InteractionContext command)
   {
-    List<DiscordRole> savedRoles = command.Guild.Roles.Where(rolePair => Roles.savedRoles.Contains(rolePair.Key))
-      .Select(rolePair => rolePair.Value).ToList();
+    List<ulong> selectableRoles = Database.GetSelectableRoles();
+    List<DiscordRole> savedRoles = command.Guild.Roles.Where(rolePair => selectableRoles.Contains(rolePair.Key))
+                                                      .Select(rolePair => rolePair.Value).ToList();
 
     savedRoles = savedRoles.OrderBy(x => x.Name).ToList();
     List<DiscordSelectComponent> selectionComponents = new List<DiscordSelectComponent>();
@@ -44,7 +45,7 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
       {
         roleOptions.Add(new DiscordSelectComponentOption(savedRoles[selectionOptions].Name, savedRoles[selectionOptions].Id.ToString()));
       }
-      selectionComponents.Add(new DiscordSelectComponent("rolemanager_togglerole" + selectionBoxes, "Join/Leave role", roleOptions, false, 0, 1));
+      selectionComponents.Add(new DiscordSelectComponent("roleboi_togglerole" + selectionBoxes, "Join/Leave role", roleOptions, false, 0, 1));
     }
 
     return selectionComponents;

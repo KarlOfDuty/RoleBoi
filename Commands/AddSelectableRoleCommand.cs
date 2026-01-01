@@ -3,43 +3,40 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using RoleBoi;
 
 namespace RoleBoi.Commands;
 
 public class AddSelectableRoleCommand : ApplicationCommandModule
 {
   [SlashRequireGuild]
-  [SlashCommand("addrole", "Adds a Discord role to the bot")]
-  public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to add.")] DiscordRole role)
+  [SlashCommand("addselectablerole", "Allow users to give themselves this role using the role selector.")]
+  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to add.")] DiscordRole role)
   {
-    // TODO: Update for RoleBoi
-
-    if (Roles.savedRoles.Any(savedRole => savedRole == role.Id))
+    if (Database.GetSelectableRoles().Any(r => r == role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role is already enabled."
+        Description = "That role is already selectable."
       }, true);
       return;
     }
 
-    if (!command.Guild.Roles.ContainsKey(role.Id))
+    if (!Database.TryAddSelectableRole(role.Id))
     {
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "That role doesn't exist."
+        Description = "Failed to add selectable role."
       }, true);
       return;
     }
-
-    Roles.AddRole(role.Id);
 
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
-      Description = "Role added."
+      Description = "Selectable role added."
     }, true);
   }
 }
