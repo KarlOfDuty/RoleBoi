@@ -68,7 +68,7 @@ namespace RoleBoi
         if (Config.trackedRoles.Contains(role.Id))
         {
           Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") left the server with tracked role '" + role.Name + "'.");
-          Database.TryAddRole(e.Member.Id, role.Id);
+          Database.TryAddUserRole(e.Member.Id, role.Id);
         }
       }
       return Task.CompletedTask;
@@ -88,7 +88,7 @@ namespace RoleBoi
         catch (UnauthorizedException) {}
       }
 
-      if (!Database.TryGetRoles(e.Member.Id, out List<Database.SavedRole> savedRoles)) return;
+      if (!Database.TryGetUserRoles(e.Member.Id, out List<Database.SavedRole> savedRoles)) return;
 
       foreach (Database.SavedRole savedRole in savedRoles)
       {
@@ -102,7 +102,7 @@ namespace RoleBoi
         catch (UnauthorizedException) {}
       }
 
-      Database.TryRemoveRoles(e.Member.Id);
+      Database.TryRemoveUserRoles(e.Member.Id);
     }
 
 

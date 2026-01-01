@@ -10,8 +10,6 @@ namespace RoleBoi;
 internal static class Config
 {
   internal static string token = "";
-  internal static ulong[] trackedRoles = [];
-  internal static ulong[] everyoneRoles = [];
   internal static string presenceType = "Playing";
   internal static string presenceText = "";
 
@@ -63,8 +61,6 @@ internal static class Config
     Logger.SetLogLevel(logLevel);
 
     token = json.SelectToken("bot.token")?.Value<string>() ?? "";
-    trackedRoles = json.SelectToken("bot.tracked-roles")?.Value<JArray>().Values<ulong>().ToArray() ?? []; //TODO: Read these from database instead
-    everyoneRoles = json.SelectToken("bot.everyone-roles")?.Value<JArray>().Values<ulong>().ToArray() ?? []; //TODO: Read these from database instead
     presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
     presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
     databaseFile = json.SelectToken("bot.database-file")?.Value<string>() ?? "./roleboi.db";

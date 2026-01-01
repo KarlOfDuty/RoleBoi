@@ -25,39 +25,46 @@ namespace RoleBoi
       return new SqliteConnection("Data Source=" + Config.databaseFile + ";Cache=Shared");
     }
 
+    private static int ExecuteNonQuery(string sql, Dictionary<string, long> longVars = null)
+    {
+      using SqliteConnection c = GetConnection();
+      c.Open();
+
+      using SqliteCommand cmd = new(sql, c);
+      if (longVars != null)
+      {
+        foreach (KeyValuePair<string, long> longVar in longVars)
+        {
+          cmd.Parameters.AddWithValue(longVar.Key, longVar.Value);
+        }
+      }
+
+      return cmd.ExecuteNonQuery();
+    }
+
     public static void SetupTables()
     {
-      using SqliteConnection c = GetConnection();
-
-      c.Open();
-      using SqliteCommand createTable = new SqliteCommand(
-                "CREATE TABLE IF NOT EXISTS tracked_roles(" +
-                "user_id INTEGER NOT NULL," +
-                "role_id INTEGER NOT NULL," +
-                "time TEXT NOT NULL);",
-                c);
-      createTable.ExecuteNonQuery();
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS user_roles (user_id INTEGER PRIMARY KEY, role_id INTEGER NOT NULL, time TEXT NOT NULL);");
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_tracked_roles    (role_id INTEGER PRIMARY KEY)");
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_pingable_roles   (role_id INTEGER PRIMARY KEY)");
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_selectable_roles (role_id INTEGER PRIMARY KEY)");
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_join_roles       (role_id INTEGER PRIMARY KEY)");
     }
 
-    public static bool TryAddRole(ulong userID, ulong roleID)
+    public static bool TryAddUserRole(ulong userID, ulong roleID)
     {
-      using SqliteConnection c = GetConnection();
-      c.Open();
-
-      using SqliteCommand cmd = new SqliteCommand(@"INSERT INTO tracked_roles (user_id, role_id, time) VALUES (@user_id, @role_id, CURRENT_TIMESTAMP);", c);
-      cmd.Parameters.AddWithValue("@user_id", (long)userID);
-      cmd.Parameters.AddWithValue("@role_id", (long)roleID);
-
-      return cmd.ExecuteNonQuery() > 0;
+      int result = ExecuteNonQuery("INSERT INTO user_roles (user_id, role_id, time) VALUES (@user_id, @role_id, CURRENT_TIMESTAMP);",
+                                   new() { { "@user_id", (long)userID }, { "@role_id", (long)roleID } });
+      return result > 0;
     }
 
-    public static bool TryGetRoles(ulong userID, out List<SavedRole> roles)
+    public static bool TryGetUserRoles(ulong userID, out List<SavedRole> roles)
     {
       roles = null;
       using SqliteConnection c = GetConnection();
       c.Open();
 
-      using SqliteCommand selection = new SqliteCommand(@"SELECT user_id, role_id, time FROM tracked_roles WHERE user_id=@user_id", c);
+      using SqliteCommand selection = new SqliteCommand(@"SELECT user_id, role_id, time FROM user_roles WHERE user_id=@user_id;", c);
       selection.Parameters.AddWithValue("@user_id", (long)userID);
       SqliteDataReader results = selection.ExecuteReader();
 
@@ -75,17 +82,11 @@ namespace RoleBoi
       return true;
     }
 
-    public static bool TryRemoveRoles(ulong userID)
+    public static bool TryRemoveUserRoles(ulong userID)
     {
-      using (SqliteConnection c = GetConnection())
-      {
-        c.Open();
-
-        using SqliteCommand deletion = new SqliteCommand(@"DELETE FROM tracked_roles WHERE user_id=@user_id", c);
-        deletion.Parameters.AddWithValue("@user_id", (long)userID);
-
-        return deletion.ExecuteNonQuery() > 0;
-      }
+      int result = ExecuteNonQuery("DELETE FROM user_roles WHERE user_id=@user_id;",
+                                   new() { { "@user_id", (long)userID } });
+      return result > 0;
     }
   }
 }
