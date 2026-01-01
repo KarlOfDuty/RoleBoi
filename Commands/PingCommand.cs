@@ -4,14 +4,13 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
 public class PingCommand : ApplicationCommandModule
 {
   [SlashRequireGuild]
-  [SlashCommand("ping", "Mentions a Discord role registered with the bot.")]
+  [SlashCommand("ping", "Mentions a Discord role.")]
   public async Task OnExecute(InteractionContext command, [Option("Role", "The role you want to mention.")] DiscordRole role)
   {
     if (Database.GetPingableRoles().All(savedRole => savedRole != role.Id))
@@ -19,7 +18,7 @@ public class PingCommand : ApplicationCommandModule
       await command.CreateResponseAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
-        Description = "This role cannot be pinged."
+        Description = "This role has not been set as pingable in the bot settings."
       }, true);
       return;
     }

@@ -57,7 +57,7 @@ namespace RoleBoi
 
     public static Task OnClientError(DiscordClient _, ClientErrorEventArgs e)
     {
-      Logger.Error("Exception occured:\n" + e.Exception);
+      Logger.Error("Discord client error occurred", e.Exception);
       return Task.CompletedTask;
     }
 
@@ -68,7 +68,7 @@ namespace RoleBoi
       {
         if (trackedRoles.Contains(role.Id))
         {
-          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") left the server with tracked role '" + role.Name + "'.");
+          Logger.Log($"{e.Member.Username} ({e.Member.Id}) left the server with tracked role '{role.Name}'.");
           Database.TryAddUserRole(e.Member.Id, role.Id);
         }
       }
@@ -84,10 +84,12 @@ namespace RoleBoi
         {
           DiscordRole role = e.Guild.GetRole(roleID);
           await e.Member.GrantRoleAsync(role);
-          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") was given the '" + role.Name + "' role. ");
+          Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given the '{role.Name}' role.");
         }
-        catch (NotFoundException) {}
-        catch (UnauthorizedException) {}
+        catch (Exception ex)
+        {
+          Logger.Error($"Error occurred when attempting to add join role {roleID} to member {e.Member.Username}", ex);
+        }
       }
 
       if (!Database.TryGetUserRoles(e.Member.Id, out List<Database.SavedRole> savedRoles)) return;
@@ -98,10 +100,12 @@ namespace RoleBoi
         {
           DiscordRole role = e.Guild.GetRole(savedRole.roleID);
           await e.Member.GrantRoleAsync(role);
-          Logger.Log(e.Member.DisplayName + " (" + e.Member.Id + ") was given back the '" + role.Name + "' role on rejoin. ");
+          Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given back the '{role.Name}' role on rejoin.");
         }
-        catch (NotFoundException) {}
-        catch (UnauthorizedException) {}
+        catch (Exception ex)
+        {
+          Logger.Error($"Error occurred when attempting to add tracked role {savedRole.roleID} to member {e.Member.Username}", ex);
+        }
       }
 
       Database.TryRemoveUserRoles(e.Member.Id);

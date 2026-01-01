@@ -14,6 +14,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
+using RoleBoi.Commands;
 using Tmds.Systemd;
 using ServiceState = Tmds.Systemd.ServiceState;
 
@@ -253,7 +254,7 @@ internal static class RoleBoi
         Logger.Log("Hooking command events...");
         commands.SlashCommandErrored += EventHandler.OnCommandError;
 
-        /*commands.RegisterCommands<AddJoinRoleCommand>();
+        commands.RegisterCommands<AddJoinRoleCommand>();
         commands.RegisterCommands<AddPingRoleCommand>();
         commands.RegisterCommands<AddSelectableRoleCommand>();
         commands.RegisterCommands<AddTrackedRoleCommand>();
@@ -262,7 +263,7 @@ internal static class RoleBoi
         commands.RegisterCommands<RemoveSelectableRoleCommand>();
         commands.RegisterCommands<RemoveTrackedRoleCommand>();
         commands.RegisterCommands<PingCommand>();
-        commands.RegisterCommands<CreateRoleSelectorCommand>();*/
+        commands.RegisterCommands<CreateRoleSelectorCommand>();
 
         Logger.Log("Connecting to Discord...");
         EventHandler.hasLoggedGuilds = false;
