@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using RoleBoi;
 
 namespace RoleBoi.Commands;
 
@@ -20,7 +21,18 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
       builder.AddComponents(component);
     }
 
+    if (!builder.Components.Any())
+    {
+      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      {
+        Color = DiscordColor.Red,
+        Description = "There are no roles registered for the selector, add some using `/addselectablerole`."
+      }, true);
+      return;
+    }
+
     await command.Channel.SendMessageAsync(builder);
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) created a role selector in channel '{command.Channel.Name}' ({command.Channel.Id}).");
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
@@ -31,6 +43,7 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
   public static async Task<List<DiscordSelectComponent>> GetSelectComponents(InteractionContext command)
   {
     List<ulong> selectableRoles = Database.GetSelectableRoles();
+
     List<DiscordRole> savedRoles = command.Guild.Roles.Where(rolePair => selectableRoles.Contains(rolePair.Key))
                                                       .Select(rolePair => rolePair.Value).ToList();
 

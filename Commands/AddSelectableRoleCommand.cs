@@ -33,6 +33,7 @@ public class AddSelectableRoleCommand : ApplicationCommandModule
       return;
     }
 
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) added the '{role.Name}' selectable role.");
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,

@@ -33,6 +33,7 @@ public class RemoveSelectableRoleCommand : ApplicationCommandModule
       return;
     }
 
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) removed the '{role.Name}' selectable role.");
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,

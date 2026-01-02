@@ -33,6 +33,7 @@ public class RemovePingRoleCommand : ApplicationCommandModule
       return;
     }
 
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) removed the '{role.Name}' pingable role.");
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,

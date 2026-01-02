@@ -84,7 +84,7 @@ namespace RoleBoi
         {
           DiscordRole role = e.Guild.GetRole(roleID);
           await e.Member.GrantRoleAsync(role);
-          Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given the '{role.Name}' role.");
+          Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given the '{role.Name}' role on join.");
         }
         catch (Exception ex)
         {
@@ -155,15 +155,14 @@ namespace RoleBoi
         switch (e.Interaction.Data.ComponentType)
         {
           case ComponentType.StringSelect:
-            if (!e.Interaction.Data.CustomId.StartsWith("rolemanager_togglerole"))
+            if (!e.Interaction.Data.CustomId.StartsWith("roleboi_togglerole"))
             {
               return;
             }
 
             if (e.Interaction.Data.Values.Length == 0)
             {
-              await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
-                new DiscordInteractionResponseBuilder().WithContent(e.Message.Content).AddComponents(e.Message.Components));
+              await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage);
             }
 
             foreach (string stringID in e.Interaction.Data.Values)

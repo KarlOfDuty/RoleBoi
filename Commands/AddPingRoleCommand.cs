@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using RoleBoi;
 
 namespace RoleBoi.Commands;
 
@@ -32,6 +33,7 @@ public class AddPingRoleCommand : ApplicationCommandModule
       return;
     }
 
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) added the '{role.Name}' pingable role.");
     await command.CreateResponseAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
