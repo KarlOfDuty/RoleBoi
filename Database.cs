@@ -44,7 +44,7 @@ namespace RoleBoi
 
     public static void SetupTables()
     {
-      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS user_roles (user_id INTEGER PRIMARY KEY, role_id INTEGER NOT NULL, time TEXT NOT NULL);");
+      ExecuteNonQuery("CREATE TABLE IF NOT EXISTS user_roles (user_id INTEGER NOT NULL, role_id INTEGER NOT NULL, time TEXT NOT NULL);");
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_tracked_roles    (role_id INTEGER PRIMARY KEY)");
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_pingable_roles   (role_id INTEGER PRIMARY KEY)");
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_selectable_roles (role_id INTEGER PRIMARY KEY)");
