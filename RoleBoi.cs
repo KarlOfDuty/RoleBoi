@@ -79,6 +79,8 @@ internal static class RoleBoi
         PosixSignalRegistration.Create(PosixSignal.SIGTERM, HandleSignal);
         PosixSignalRegistration.Create(PosixSignal.SIGINT, HandleSignal);
 
+        SQLitePCL.Batteries_V2.Init();
+
         StringWriter sw = new();
         commandLineArgs = new Parser(settings =>
         {
