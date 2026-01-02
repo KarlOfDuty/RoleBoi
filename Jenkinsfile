@@ -73,7 +73,7 @@ pipeline
         {
           steps
           {
-            sh 'dotnet publish -r linux-x64 -c Release -p:PublishTrimmed=true --self-contained true --no-restore --output linux-x64/'
+            sh 'dotnet publish -r linux-x64 -c Release -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true --self-contained true --no-restore --output linux-x64/'
             sh 'mv linux-x64/roleboi linux-x64/roleboi-sc'
             sh 'dotnet publish -r linux-x64 -c Release --self-contained false --no-restore --output linux-x64/'
             archiveArtifacts(artifacts: 'linux-x64/roleboi', caseSensitive: true)
@@ -89,7 +89,7 @@ pipeline
         {
           steps
           {
-            sh 'dotnet publish -r win-x64 -c Release -p:PublishTrimmed=true --self-contained true --no-restore --output windows-x64/'
+            sh 'dotnet publish -r win-x64 -c Release -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true --self-contained true --no-restore --output windows-x64/'
             sh 'mv windows-x64/roleboi.exe windows-x64/roleboi-sc.exe'
             sh 'dotnet publish -r win-x64 -c Release --self-contained false --no-restore --output windows-x64/'
             archiveArtifacts(artifacts: 'windows-x64/roleboi.exe', caseSensitive: true)

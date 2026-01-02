@@ -17,6 +17,8 @@ RestartPreventExitStatus=1
 ExecStart=/usr/bin/roleboi --config /etc/roleboi/config.yml --log-file /var/log/roleboi/roleboi.log
 ExecReload=/bin/kill -HUP $MAINPID
 
+RuntimeDirectory=roleboi
+Environment=DOTNET_BUNDLE_EXTRACT_BASE_DIR=/run/roleboi
 
 [Install]
 WantedBy=multi-user.target
