@@ -22,9 +22,9 @@ internal static class Config
 
   public static void LoadConfig()
   {
-    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.configPath))
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.ConfigPath))
     {
-      ConfigPath = RoleBoi.commandLineArgs.configPath;
+      ConfigPath = RoleBoi.commandLineArgs.ConfigPath;
     }
 
     Logger.Log("Loading config \"" + Path.GetFullPath(ConfigPath) + "\"");
@@ -47,9 +47,9 @@ internal static class Config
     JObject json = JObject.Parse(serializer.Serialize(yamlObject));
 
     LogPath = json.SelectToken("bot.log-file")?.Value<string>() ?? "";
-    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.logFilePath))
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.LogFilePath))
     {
-      LogPath = RoleBoi.commandLineArgs.logFilePath;
+      LogPath = RoleBoi.commandLineArgs.LogFilePath;
     }
 
     string stringLogLevel = json.SelectToken("bot.console-log-level")?.Value<string>() ?? "";

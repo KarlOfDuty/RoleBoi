@@ -98,9 +98,6 @@ public class Logger(string logCategory) : ILogger
             logLevel = LogLevel.Debug;
         }
 
-        // Uncomment to check log category of log message
-        //Console.WriteLine("Log Category: " + logCategory);
-
         // Remove HTTP Client spam
         if (logCategory.StartsWith("System.Net.Http.HttpClient"))
         {

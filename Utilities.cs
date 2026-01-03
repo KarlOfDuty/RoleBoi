@@ -23,8 +23,7 @@ public static class Extensions
 
 public static class Utilities
 {
-  // Use CLOCK_MONOTONIC for MONOTONIC_USEC as expected by systemd notify-reload.
-  // See: sd_notify(3) documentation.
+  // CLOCK_MONOTONIC is the specific clock we want to read in the clock_gettime function and has the ID 1.
   private const int CLOCK_MONOTONIC = 1;
 
   [StructLayout(LayoutKind.Sequential)]
@@ -38,25 +37,25 @@ public static class Utilities
   [DllImport("libc", EntryPoint = "clock_gettime", SetLastError = true)]
   private static extern int clock_gettime(int clk_id, out Timespec tp);
 
-  [SupportedOSPlatform("linux")]
   public static long GetMonotonicUsec()
   {
+    if (!OperatingSystem.IsLinux())
+    {
+      return -1;
+    }
+
     try
     {
       if (clock_gettime(CLOCK_MONOTONIC, out Timespec ts) == 0)
       {
         checked
         {
-          return ts.tv_sec * 1_000_000 + ts.tv_nsec / 1000;
+          return ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
         }
       }
     }
-    catch
-    {
-      // ignore and use fallback below
-    }
+    catch { /* ignored */ }
 
-    // Final fallback in case of any error
     return Environment.TickCount64 * 1000;
   }
 

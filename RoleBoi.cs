@@ -11,7 +11,12 @@ using System.Linq; // Needed in dotnet 9.0 sdk
 using DSharpPlus;
 using CommandLine;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
 using RoleBoi.Commands;
@@ -23,7 +28,6 @@ namespace RoleBoi;
 internal static class RoleBoi
 {
     internal static DiscordClient client = null;
-    private static SlashCommandsExtension commands = null;
 
     internal const string APPLICATION_NAME = "RoleBoi";
 
@@ -36,14 +40,14 @@ internal static class RoleBoi
                 Required = false,
                 HelpText = "Select a config file to use.",
                 MetaValue = "PATH")]
-        public string configPath { get; set; }
+        public string ConfigPath { get; set; }
 
         [CommandLine.Option('l',
             "log-file",
             Required = false,
             HelpText = "Select log file to write bot logs to.",
             MetaValue = "PATH")]
-        public string logFilePath { get; set; }
+        public string LogFilePath { get; set; }
 
         [CommandLine.Option("leave",
                 Required = false,
@@ -52,7 +56,7 @@ internal static class RoleBoi
                 MetaValue = "ID,ID,ID...",
                 Separator = ','
         )]
-        public IEnumerable<ulong> serversToLeave { get; set; }
+        public IEnumerable<ulong> ServersToLeave { get; set; }
     }
 
     internal static CommandLineArguments commandLineArgs;
@@ -230,44 +234,68 @@ internal static class RoleBoi
 
     private static async Task<bool> Connect()
     {
-        // Setting up client configuration
-        DiscordConfiguration cfg = new DiscordConfiguration
+        Logger.Log("Setting up Discord client.");
+        DiscordClientBuilder clientBuilder = DiscordClientBuilder.CreateDefault(Config.token, DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers)
+                                                                 .SetReconnectOnFatalGatewayErrors();
+
+        clientBuilder.ConfigureServices(configure =>
         {
-            Token = Config.token,
-            TokenType = TokenType.Bot,
-            MinimumLogLevel = LogLevel.Debug,
-            AutoReconnect = true,
-            Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers
-        };
+            configure.AddSingleton<IClientErrorHandler>(new ErrorHandler());
+        });
 
-        client = new DiscordClient(cfg);
+        clientBuilder.ConfigureEventHandlers(builder =>
+        {
+            builder.HandleGuildDownloadCompleted(EventHandler.OnReady);
+            builder.HandleGuildAvailable(EventHandler.OnGuildAvailable);
+            builder.HandleGuildMemberAdded(EventHandler.OnGuildMemberAdded);
+            builder.HandleGuildMemberRemoved(EventHandler.OnGuildMemberRemoved);
+            builder.HandleComponentInteractionCreated(EventHandler.OnComponentInteractionCreated);
+        });
 
-        Logger.Log("Hooking events...");
-        client.Ready += EventHandler.OnReady;
-        client.GuildAvailable += EventHandler.OnGuildAvailable;
-        client.ClientErrored += EventHandler.OnClientError;
-        client.GuildMemberAdded += EventHandler.OnGuildMemberAdded;
-        client.GuildMemberRemoved += EventHandler.OnGuildMemberRemoved;
-        client.ComponentInteractionCreated += EventHandler.OnComponentInteractionCreated;
+        clientBuilder.UseInteractivity(new InteractivityConfiguration
+        {
+            PaginationBehaviour = PaginationBehaviour.Ignore,
+            PaginationDeletion = PaginationDeletion.DeleteMessage,
+            Timeout = TimeSpan.FromMinutes(15)
+        });
 
-        Logger.Log("Registering commands...");
-        commands = client.UseSlashCommands();
+        clientBuilder.UseCommands((_, extension) =>
+        {
+            extension.AddCommands(
+            [
+                typeof(AddJoinRoleCommand),
+                typeof(AddPingRoleCommand),
+                typeof(AddSelectableRoleCommand),
+                typeof(AddTrackedRoleCommand),
+                typeof(RemoveJoinRoleCommand),
+                typeof(RemovePingRoleCommand),
+                typeof(RemoveSelectableRoleCommand),
+                typeof(RemoveTrackedRoleCommand),
+                typeof(PingCommand),
+                typeof(CreateRoleSelectorCommand),
+            ]);
+            extension.AddProcessor(new SlashCommandProcessor());
+            extension.CommandErrored += EventHandler.OnCommandError;
+        }, new CommandsConfiguration
+        {
+            RegisterDefaultCommandProcessors = false,
+            UseDefaultCommandErrorHandler = false
+        });
 
-        Logger.Log("Hooking command events...");
-        commands.SlashCommandErrored += EventHandler.OnCommandError;
+        clientBuilder.ConfigureExtraFeatures(clientConfig =>
+        {
+            clientConfig.LogUnknownEvents = false;
+            clientConfig.LogUnknownAuditlogs = false;
+        });
 
-        commands.RegisterCommands<AddJoinRoleCommand>();
-        commands.RegisterCommands<AddPingRoleCommand>();
-        commands.RegisterCommands<AddSelectableRoleCommand>();
-        commands.RegisterCommands<AddTrackedRoleCommand>();
-        commands.RegisterCommands<RemoveJoinRoleCommand>();
-        commands.RegisterCommands<RemovePingRoleCommand>();
-        commands.RegisterCommands<RemoveSelectableRoleCommand>();
-        commands.RegisterCommands<RemoveTrackedRoleCommand>();
-        commands.RegisterCommands<PingCommand>();
-        commands.RegisterCommands<CreateRoleSelectorCommand>();
+        clientBuilder.ConfigureLogging(config =>
+        {
+            config.AddProvider(new LoggerProvider());
+        });
 
-        Logger.Log("Connecting to Discord...");
+        client = clientBuilder.Build();
+
+        Logger.Log("Connecting to Discord.");
         EventHandler.hasLoggedGuilds = false;
 
         try
@@ -287,13 +315,13 @@ internal static class RoleBoi
     {
         try
         {
-            if (!Enum.TryParse(Config.presenceType, true, out ActivityType activityType))
+            if (!Enum.TryParse(Config.presenceType, true, out DiscordActivityType activityType))
             {
                 Logger.Log("Presence type '" + Config.presenceType + "' invalid, using 'Playing' instead.");
-                activityType = ActivityType.Playing;
+                activityType = DiscordActivityType.Playing;
             }
 
-            client.UpdateStatusAsync(new DiscordActivity(Config.presenceText, activityType), UserStatus.Online);
+            client.UpdateStatusAsync(new DiscordActivity(Config.presenceText, activityType), DiscordUserStatus.Online);
         }
         finally
         {

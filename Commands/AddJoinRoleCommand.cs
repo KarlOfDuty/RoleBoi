@@ -1,20 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 
 namespace RoleBoi.Commands;
 
-public class AddJoinRoleCommand : ApplicationCommandModule
+public class AddJoinRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("addjoinrole", "Add a role for everyone to receive on join.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to add.")] DiscordRole role)
+  [RequireGuild]
+  [Command("addjoinrole")]
+  [Description("Add a role for everyone to receive on join.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to add.")] DiscordRole role)
   {
     if (Database.GetJoinRoles().Any(r => r == role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is already configured as a join role."
@@ -24,7 +27,7 @@ public class AddJoinRoleCommand : ApplicationCommandModule
 
     if (!Database.TryAddJoinRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to add join role."
@@ -33,7 +36,7 @@ public class AddJoinRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) added the '{role.Name}' join role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Join role added."

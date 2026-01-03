@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.EventArgs;
+using DSharpPlus.Commands.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using DSharpPlus.SlashCommands.EventArgs;
 
 namespace RoleBoi
 {
@@ -16,23 +17,16 @@ namespace RoleBoi
   {
     internal static bool hasLoggedGuilds = false;
 
-    public static Task OnReady(DiscordClient client, ReadyEventArgs e)
+    public static Task OnReady(DiscordClient client, GuildDownloadCompletedEventArgs e)
     {
-      Logger.Log("Client is ready to process events.");
+      Logger.Log("Connected to Discord.");
 
-      // Checking activity type
-      if (!Enum.TryParse(Config.presenceType, true, out ActivityType activityType))
-      {
-        Console.WriteLine("Presence type '" + Config.presenceType + "' invalid, using 'Playing' instead.");
-        activityType = ActivityType.Playing;
-      }
-
-      client.UpdateStatusAsync(new DiscordActivity(Config.presenceText, activityType), UserStatus.Online);
+      RoleBoi.RefreshBotActivity();
       hasLoggedGuilds = true;
       return Task.CompletedTask;
     }
 
-    public static async Task OnGuildAvailable(DiscordClient _, GuildCreateEventArgs e)
+    public static async Task OnGuildAvailable(DiscordClient discordClient, GuildAvailableEventArgs e)
     {
       if (hasLoggedGuilds)
       {
@@ -41,7 +35,7 @@ namespace RoleBoi
 
       Logger.Log("Found Discord server: " + e.Guild.Name + " (" + e.Guild.Id + ")");
 
-      if (RoleBoi.commandLineArgs.serversToLeave.Contains(e.Guild.Id))
+      if (RoleBoi.commandLineArgs.ServersToLeave.Contains(e.Guild.Id))
       {
         Logger.Warn("LEAVING DISCORD SERVER AS REQUESTED: " + e.Guild.Name + " (" + e.Guild.Id + ")");
         await e.Guild.LeaveAsync();
@@ -49,19 +43,14 @@ namespace RoleBoi
       }
 
       IReadOnlyDictionary<ulong, DiscordRole> roles = e.Guild.Roles;
+
       foreach ((ulong roleID, DiscordRole role) in roles)
       {
-        Logger.Log(role.Name.PadRight(40, '.') + roleID);
+        Logger.Debug(role.Name.PadRight(40, '.') + roleID);
       }
     }
 
-    public static Task OnClientError(DiscordClient _, ClientErrorEventArgs e)
-    {
-      Logger.Error("Discord client error occurred", e.Exception);
-      return Task.CompletedTask;
-    }
-
-    public static Task OnGuildMemberRemoved(DiscordClient _, GuildMemberRemoveEventArgs e)
+    public static Task OnGuildMemberRemoved(DiscordClient _, GuildMemberRemovedEventArgs e)
     {
       List<ulong> trackedRoles = Database.GetTrackedRoles();
       foreach (DiscordRole role in e.Member.Roles)
@@ -75,14 +64,14 @@ namespace RoleBoi
       return Task.CompletedTask;
     }
 
-    public static async Task OnGuildMemberAdded(DiscordClient _, GuildMemberAddEventArgs e)
+    public static async Task OnGuildMemberAdded(DiscordClient _, GuildMemberAddedEventArgs e)
     {
       List<ulong> joinRoles = Database.GetJoinRoles();
       foreach (ulong roleID in joinRoles)
       {
         try
         {
-          DiscordRole role = e.Guild.GetRole(roleID);
+          DiscordRole role = await e.Guild.GetRoleAsync(roleID);
           await e.Member.GrantRoleAsync(role);
           Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given the '{role.Name}' role on join.");
         }
@@ -98,7 +87,7 @@ namespace RoleBoi
       {
         try
         {
-          DiscordRole role = e.Guild.GetRole(savedRole.roleID);
+          DiscordRole role = await e.Guild.GetRoleAsync(savedRole.roleID);
           await e.Member.GrantRoleAsync(role);
           Logger.Log($"{e.Member.Username} ({e.Member.Id}) was given back the '{role.Name}' role on rejoin.");
         }
@@ -112,49 +101,56 @@ namespace RoleBoi
     }
 
 
-    internal static Task OnCommandError(SlashCommandsExtension commandSystem, SlashCommandErrorEventArgs e)
+    public static async Task OnCommandError(CommandsExtension commandSystem, CommandErroredEventArgs e)
     {
-      switch (e.Exception)
+      try
       {
-        case SlashExecutionChecksFailedException checksFailedException:
+        switch (e.Exception)
         {
-          foreach (SlashCheckBaseAttribute attr in checksFailedException.FailedChecks)
+          case ChecksFailedException checksFailedException:
           {
-            DiscordEmbed error = new DiscordEmbedBuilder
+            foreach (ContextCheckFailedData error in checksFailedException.Errors)
             {
-              Color = DiscordColor.Red,
-              Description = ParseFailedCheck(attr)
-            };
-            e.Context.CreateResponseAsync(error);
-          }
-          return Task.CompletedTask;
-        }
-        default:
-        {
-          Logger.Error("Exception occured: " + e.Exception.GetType(), e.Exception);
-          if (e.Exception is UnauthorizedException ex)
-          {
-            Logger.Error(ex.WebResponse.Response);
+              await e.Context.Channel.SendMessageAsync(new DiscordEmbedBuilder
+              {
+                Color = DiscordColor.Red,
+                Description = error.ErrorMessage
+              });
+            }
+            return;
           }
 
-          DiscordEmbed error = new DiscordEmbedBuilder
+          case BadRequestException ex:
+            Logger.Error("Command exception occured.", e.Exception);
+            Logger.Error("JSON Message: " + ex.JsonMessage);
+            return;
+
+          default:
           {
-            Color = DiscordColor.Red,
-            Description = "Internal error occured, please report this to the developer."
-          };
-          e.Context.CreateResponseAsync(error);
-          return Task.CompletedTask;
+            Logger.Error("Command exception occured.", e.Exception);
+            await e.Context.Channel.SendMessageAsync(new DiscordEmbedBuilder
+            {
+              Color = DiscordColor.Red,
+              Description = "Internal error occured, please report this to the developer."
+            });
+            return;
+          }
         }
+      }
+      catch (Exception ex)
+      {
+        Logger.Error("An error occurred in command error handler.", ex);
+        Logger.Error("Original exception:", e.Exception);
       }
     }
 
-    internal static async Task OnComponentInteractionCreated(DiscordClient client, ComponentInteractionCreateEventArgs e)
+    internal static async Task OnComponentInteractionCreated(DiscordClient client, ComponentInteractionCreatedEventArgs e)
     {
       try
       {
         switch (e.Interaction.Data.ComponentType)
         {
-          case ComponentType.StringSelect:
+          case DiscordComponentType.StringSelect:
             if (!e.Interaction.Data.CustomId.StartsWith("roleboi_togglerole"))
             {
               return;
@@ -162,7 +158,7 @@ namespace RoleBoi
 
             if (e.Interaction.Data.Values.Length == 0)
             {
-              await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage);
+              await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage);
             }
 
             foreach (string stringID in e.Interaction.Data.Values)
@@ -175,7 +171,7 @@ namespace RoleBoi
               if (member.Roles.Any(role => role.Id == roleID))
               {
                 await member.RevokeRoleAsync(e.Guild.Roles[roleID]);
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
                   new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
                   {
                     Color = DiscordColor.Green,
@@ -185,7 +181,7 @@ namespace RoleBoi
               else
               {
                 await member.GrantRoleAsync(e.Guild.Roles[roleID]);
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
                   new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
                   {
                     Color = DiscordColor.Green,
@@ -194,16 +190,14 @@ namespace RoleBoi
               }
             }
             break;
-
-          case ComponentType.ActionRow:
-          case ComponentType.Button:
-          case ComponentType.FormInput:
+          default:
+            Logger.Warn("Unknown interaction type received! '" + e.Interaction.Data.ComponentType + "'");
             return;
         }
       }
       catch (UnauthorizedException)
       {
-        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+        await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
           new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
           {
             Color = DiscordColor.Red,
@@ -213,7 +207,7 @@ namespace RoleBoi
       catch (Exception ex)
       {
         Logger.Error("Exception occured: " + ex.GetType(), ex);
-        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+        await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
           new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
           {
             Color = DiscordColor.Red,
@@ -221,19 +215,29 @@ namespace RoleBoi
           }).AsEphemeral());
       }
     }
+  }
 
-    private static string ParseFailedCheck(SlashCheckBaseAttribute attr)
+  internal class ErrorHandler : IClientErrorHandler
+  {
+    public ValueTask HandleEventHandlerError(string name,
+      Exception exception,
+      Delegate invokedDelegate,
+      object sender,
+      object args)
     {
-      return attr switch
+      Logger.Error("Client exception occured:\n" + exception);
+      if (exception is BadRequestException ex)
       {
-        SlashRequireDirectMessageAttribute _ => "This command can only be used in direct messages!",
-        SlashRequireOwnerAttribute _ => "Only the server owner can use that command!",
-        SlashRequirePermissionsAttribute _ => "You don't have permission to do that!",
-        SlashRequireBotPermissionsAttribute _ => "The bot doesn't have the required permissions to do that!",
-        SlashRequireUserPermissionsAttribute _ => "You don't have permission to do that!",
-        SlashRequireGuildAttribute _ => "This command has to be used in a Discord server!",
-        _ => "Unknown Discord API error occured, please try again later."
-      };
+        Logger.Error("JSON Message: " + ex.JsonMessage);
+      }
+
+      return ValueTask.FromException(exception);
+    }
+
+    public ValueTask HandleGatewayError(Exception exception)
+    {
+      Logger.Error("A gateway error occured:\n" + exception);
+      return ValueTask.FromException(exception);
     }
   }
 }
