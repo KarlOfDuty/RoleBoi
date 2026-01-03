@@ -267,12 +267,16 @@ internal static class RoleBoi
                 typeof(AddPingRoleCommand),
                 typeof(AddSelectableRoleCommand),
                 typeof(AddTrackedRoleCommand),
+                typeof(CreateRoleSelectorCommand),
+                typeof(ListJoinRolesCommand),
+                typeof(ListPingableRolesCommand),
+                typeof(ListSelectableRolesCommand),
+                typeof(ListTrackedRolesCommand),
+                typeof(PingCommand),
                 typeof(RemoveJoinRoleCommand),
                 typeof(RemovePingRoleCommand),
                 typeof(RemoveSelectableRoleCommand),
                 typeof(RemoveTrackedRoleCommand),
-                typeof(PingCommand),
-                typeof(CreateRoleSelectorCommand),
             ]);
             extension.AddProcessor(new SlashCommandProcessor());
             extension.CommandErrored += EventHandler.OnCommandError;
