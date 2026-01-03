@@ -1,21 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class AddTrackedRoleCommand : ApplicationCommandModule
+public class AddTrackedRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("addtrackedrole", "If users with this role leave the server they will get it back if they rejoin.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to add.")] DiscordRole role)
+  [RequireGuild]
+  [Command("addtrackedrole")]
+  [Description("If users with this role leave the server they will get it back if they rejoin.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to add.")] DiscordRole role)
   {
     if (Database.GetTrackedRoles().Any(r => r == role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is already tracked."
@@ -25,7 +27,7 @@ public class AddTrackedRoleCommand : ApplicationCommandModule
 
     if (!Database.TryAddTrackedRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to add tracked role."
@@ -34,7 +36,7 @@ public class AddTrackedRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) added the '{role.Name}' tracked role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Tracked role added."

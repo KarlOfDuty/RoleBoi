@@ -1,21 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class RemoveTrackedRoleCommand : ApplicationCommandModule
+public class RemoveTrackedRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("removetrackedrole", "Stop tracking members with this role rejoining.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to remove.")] DiscordRole role)
+  [RequireGuild]
+  [Command("removetrackedrole")]
+  [Description("Stop tracking members with this role rejoining.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to remove.")] DiscordRole role)
   {
     if (Database.GetTrackedRoles().All(r => r != role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is not tracked."
@@ -25,7 +27,7 @@ public class RemoveTrackedRoleCommand : ApplicationCommandModule
 
     if (!Database.TryRemoveTrackedRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to remove tracked role."
@@ -34,7 +36,7 @@ public class RemoveTrackedRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) removed the '{role.Name}' tracked role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Tracked role removed."

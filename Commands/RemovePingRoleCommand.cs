@@ -1,21 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class RemovePingRoleCommand : ApplicationCommandModule
+public class RemovePingRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("removepingrole", "Make a role no longer allowed to mention using /ping.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to remove.")] DiscordRole role)
+  [RequireGuild]
+  [Command("removepingrole")]
+  [Description("Make a role no longer allowed to mention using /ping.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to remove.")] DiscordRole role)
   {
     if (Database.GetPingableRoles().All(r => r != role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is not pingable."
@@ -25,7 +27,7 @@ public class RemovePingRoleCommand : ApplicationCommandModule
 
     if (!Database.TryRemovePingableRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to remove pingable role."
@@ -34,7 +36,7 @@ public class RemovePingRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) removed the '{role.Name}' pingable role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Pingable role removed."

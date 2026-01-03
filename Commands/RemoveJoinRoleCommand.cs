@@ -1,21 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class RemoveJoinRoleCommand : ApplicationCommandModule
+public class RemoveJoinRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("removejoinrole", "Remove a role from being assigned to everyone who joins.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to remove.")] DiscordRole role)
+  [RequireGuild]
+  [Command("removejoinrole")]
+  [Description("Remove a role from being assigned to everyone who joins.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to remove.")] DiscordRole role)
   {
     if (Database.GetJoinRoles().All(r => r != role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is not configured as a join role."
@@ -25,7 +27,7 @@ public class RemoveJoinRoleCommand : ApplicationCommandModule
 
     if (!Database.TryRemoveJoinRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to remove join role."
@@ -34,7 +36,7 @@ public class RemoveJoinRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) removed the '{role.Name}' join role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Join role removed."

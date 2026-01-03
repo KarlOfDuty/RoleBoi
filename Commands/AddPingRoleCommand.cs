@@ -1,21 +1,23 @@
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
-using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class AddPingRoleCommand : ApplicationCommandModule
+public class AddPingRoleCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("addpingrole", "Allow a role to be mentioned via /ping.")]
-  public async Task OnExecute(InteractionContext command, [Option("role", "The role you want to add.")] DiscordRole role)
+  [RequireGuild]
+  [Command("addpingrole")]
+  [Description("Allow a role to be mentioned via /ping.")]
+  public async Task OnExecute(SlashCommandContext command, [Parameter("role")] [Description("The role you want to add.")] DiscordRole role)
   {
     if (Database.GetPingableRoles().Any(r => r == role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "That role is already pingable."
@@ -25,7 +27,7 @@ public class AddPingRoleCommand : ApplicationCommandModule
 
     if (!Database.TryAddPingableRole(role.Id))
     {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "Failed to add pingable role."
@@ -34,7 +36,7 @@ public class AddPingRoleCommand : ApplicationCommandModule
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) added the '{role.Name}' pingable role.");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Pingable role added."

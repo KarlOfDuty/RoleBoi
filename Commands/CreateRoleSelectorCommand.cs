@@ -1,29 +1,28 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
 using RoleBoi;
 
 namespace RoleBoi.Commands;
 
-public class CreateRoleSelectorCommand : ApplicationCommandModule
+public class CreateRoleSelectorCommand
 {
-  [SlashRequireGuild]
-  [SlashCommand("createroleselector", "Creates a selection box which users can use to get new roles.")]
-  public async Task OnExecute(InteractionContext command)
+  [RequireGuild]
+  [Command("createroleselector")]
+  [Description("Creates a selection box which users can use to get new roles.")]
+  public async Task OnExecute(SlashCommandContext command,
+    [Parameter("placeholder")] [Description("(Optional) The message to show in the selection box.")] string message = null)
   {
-    DiscordMessageBuilder builder = new DiscordMessageBuilder().WithContent("Use this to join or leave public roles:");
+    List<DiscordSelectComponent> components = await GetSelectComponents(command, message ?? "Join/Leave role");
 
-    foreach (DiscordSelectComponent component in await GetSelectComponents(command))
+    if (components.Count == 0)
     {
-      builder.AddComponents(component);
-    }
-
-    if (!builder.Components.Any())
-    {
-      await command.CreateResponseAsync(new DiscordEmbedBuilder
+      await command.RespondAsync(new DiscordEmbedBuilder
       {
         Color = DiscordColor.Red,
         Description = "There are no roles registered for the selector, add some using `/addselectablerole`."
@@ -31,16 +30,21 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
       return;
     }
 
+    DiscordMessageBuilder builder = new DiscordMessageBuilder()
+      .WithContent(" ")
+      .AddActionRowComponent(new DiscordActionRowComponent(components));
+
     await command.Channel.SendMessageAsync(builder);
-    Logger.Log($"{command.Member.Username} ({command.Member.Id}) created a role selector in channel '{command.Channel.Name}' ({command.Channel.Id}).");
-    await command.CreateResponseAsync(new DiscordEmbedBuilder
+    await command.RespondAsync(new DiscordEmbedBuilder
     {
       Color = DiscordColor.Green,
       Description = "Successfully created message, make sure to run this command again if you add new roles to the bot."
     }, true);
+
+    Logger.Log($"{command.Member.Username} ({command.Member.Id}) created a role selector in channel '{command.Channel.Name}' ({command.Channel.Id}).");
   }
 
-  public static async Task<List<DiscordSelectComponent>> GetSelectComponents(InteractionContext command)
+  public static async Task<List<DiscordSelectComponent>> GetSelectComponents(SlashCommandContext command, string placeholder)
   {
     List<ulong> selectableRoles = Database.GetSelectableRoles();
 
@@ -58,7 +62,7 @@ public class CreateRoleSelectorCommand : ApplicationCommandModule
       {
         roleOptions.Add(new DiscordSelectComponentOption(savedRoles[selectionOptions].Name, savedRoles[selectionOptions].Id.ToString()));
       }
-      selectionComponents.Add(new DiscordSelectComponent("roleboi_togglerole" + selectionBoxes, "Join/Leave role", roleOptions, false, 0, 1));
+      selectionComponents.Add(new DiscordSelectComponent("roleboi_togglerole" + selectionBoxes, placeholder, roleOptions, false, 0, 1));
     }
 
     return selectionComponents;
