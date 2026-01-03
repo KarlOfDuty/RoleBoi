@@ -9,10 +9,10 @@ using DSharpPlus.Entities;
 
 namespace RoleBoi.Commands;
 
-public class ListPingableRolesCommand
+public class ListPingRolesCommand
 {
   [RequireGuild]
-  [Command("listpingableroles")]
+  [Command("listpingroles")]
   [Description("List all roles that can be pinged through the bot.")]
   public async Task OnExecute(SlashCommandContext command)
   {

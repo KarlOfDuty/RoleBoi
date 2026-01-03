@@ -269,7 +269,7 @@ internal static class RoleBoi
                 typeof(AddTrackedRoleCommand),
                 typeof(CreateRoleSelectorCommand),
                 typeof(ListJoinRolesCommand),
-                typeof(ListPingableRolesCommand),
+                typeof(ListPingRolesCommand),
                 typeof(ListSelectableRolesCommand),
                 typeof(ListTrackedRolesCommand),
                 typeof(PingCommand),
