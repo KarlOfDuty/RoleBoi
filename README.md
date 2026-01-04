@@ -12,7 +12,7 @@ All of these functions are completely independent of each other and can be compl
 #### Setup
 
 1. [Register a bot in the Discord Developer panel](docs/RegisterBotApplication.md)
-2. [Install the bot and set up a MySQL database for it](docs/Installation.md)
+2. [Install the bot](docs/Installation.md)
 
 You can find the default config [here](./default_config.yml).
 
