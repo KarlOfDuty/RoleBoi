@@ -21,7 +21,6 @@ Packager:   KarlofDuty
 Source:     rpm-source.tar.gz
 
 BuildRequires: systemd-rpm-macros
-Requires: dotnet-runtime-9.0
 %{?systemd_requires}
 
 %description
@@ -32,7 +31,7 @@ on join, retaining roles when rejoining and letting users select roles manually.
 %setup -T -c
 
 %build
-dotnet publish %{repo_root}/RoleBoi.csproj -p:PublishSingleFile=true -r linux-x64 -c Release --self-contained false --output %{_builddir}/out
+dotnet publish %{repo_root}/RoleBoi.csproj -r linux-x64 -c Release --restore --output %{_builddir}/out
 
 %install
 if [[ -d %{_rpmdir}/%{_arch} ]]; then

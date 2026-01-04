@@ -8,10 +8,13 @@
     <StartupObject>RoleBoi.RoleBoi</StartupObject>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <DebugType>embedded</DebugType>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
     <Authors>KarlofDuty</Authors>
     <Description>A small role management Discord bot.</Description>
     <NeutralLanguage>en</NeutralLanguage>
