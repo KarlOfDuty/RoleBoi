@@ -1,0 +1,9 @@
+# Example file for upstream/metadata.
+# See https://wiki.debian.org/UpstreamMetadata for more info/fields.
+# Below an example based on a github project.
+
+Bug-Database: https://github.com/KarlofDuty/RoleBoi/issues
+Bug-Submit: https://github.com/KarlofDuty/RoleBoi/issues/new
+Documentation: https://github.com/KarlofDuty/RoleBoi
+Repository-Browse: https://github.com/KarlofDuty/RoleBoi
+Repository: https://github.com/KarlofDuty/RoleBoi.git

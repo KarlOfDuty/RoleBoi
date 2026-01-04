@@ -1,59 +1,73 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
-using System.Text;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using MuteBoi.Properties;
 using YamlDotNet.Serialization;
 
-namespace MuteBoi
+namespace RoleBoi;
+
+internal static class Config
 {
-	internal static class Config
-	{
-		internal const string APPLICATION_NAME = "MuteBoi";
+  public static string Token { get; private set; } = "";
+  public static string PresenceType { get; private set; } = "Playing";
+  public static string PresenceText { get; private set; } = "";
+  public static string DatabaseFile { get; private set; } = "./roleboi.db";
+  public static string ConfigPath { get; private set; } = "./config.yml";
+  public static string LogPath { get; private set; } = "";
 
-		internal static string token = "";
-		internal static string logLevel = "Info";
-		internal static ulong[] trackedRoles = {};
-		internal static string presenceType = "Playing";
-		internal static string presenceText = "";
+  public static bool Initialized { get; private set; } = false;
 
-		internal static string hostName = "127.0.0.1";
-		internal static int    port     = 3306;
-		internal static string database = "muteboi";
-		internal static string username = "";
-		internal static string password = "";
+  public static void LoadConfig()
+  {
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.ConfigPath))
+    {
+      ConfigPath = RoleBoi.commandLineArgs.ConfigPath;
+    }
 
-		public static void LoadConfig()
-		{
-			// Writes default config to file if it does not already exist
-			if (!File.Exists("./config.yml"))
-			{
-				File.WriteAllText("./config.yml", Encoding.UTF8.GetString(Resources.default_config));
-			}
+    Logger.Log("Loading config \"" + Path.GetFullPath(ConfigPath) + "\"");
 
-			// Reads config contents into FileStream
-			FileStream stream = File.OpenRead("./config.yml");
+    // Writes default config to file if it does not already exist
+    if (!File.Exists(ConfigPath))
+    {
+      File.WriteAllText(ConfigPath, Utilities.ReadManifestData("default_config.yml"));
+    }
 
-			// Converts the FileStream into a YAML object
-			IDeserializer deserializer = new DeserializerBuilder().Build();
-			object yamlObject = deserializer.Deserialize(new StreamReader(stream));
+    // Reads config contents into FileStream
+    FileStream stream = File.OpenRead(ConfigPath);
 
-			// Converts the YAML object into a JSON object as the YAML ones do not support traversal or selection of nodes by name 
-			ISerializer serializer = new SerializerBuilder().JsonCompatible().Build();
-			JObject json = JObject.Parse(serializer.Serialize(yamlObject));
+    // Converts the FileStream into a YAML object
+    IDeserializer deserializer = new DeserializerBuilder().Build();
+    object yamlObject = deserializer.Deserialize(new StreamReader(stream));
 
-			token = json.SelectToken("bot.token").Value<string>() ?? "";
-			logLevel = json.SelectToken("bot.console-log-level").Value<string>() ?? "";
-			trackedRoles = json.SelectToken("bot.tracked-roles").Value<JArray>().Values<ulong>().ToArray();
-			presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
-			presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
+    // Converts the YAML object into a JSON object as the YAML ones do not support traversal or selection of nodes by name
+    ISerializer serializer = new SerializerBuilder().JsonCompatible().Build();
+    JObject json = JObject.Parse(serializer.Serialize(yamlObject));
 
-			// Reads database info
-			hostName = json.SelectToken("database.address").Value<string>() ?? "";
-			port = json.SelectToken("database.port").Value<int>();
-			database = json.SelectToken("database.name").Value<string>() ?? "";
-			username = json.SelectToken("database.user").Value<string>() ?? "";
-			password = json.SelectToken("database.password").Value<string>() ?? "";
-		}
-	}
+    LogPath = json.SelectToken("bot.log-file")?.Value<string>() ?? "";
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.LogFilePath))
+    {
+      LogPath = RoleBoi.commandLineArgs.LogFilePath;
+    }
+
+    DatabaseFile = json.SelectToken("bot.database-file")?.Value<string>() ?? "./roleboi.db";
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.DatabasePath))
+    {
+      DatabaseFile = RoleBoi.commandLineArgs.DatabasePath;
+    }
+
+    string stringLogLevel = json.SelectToken("bot.console-log-level")?.Value<string>() ?? "";
+    if (!Enum.TryParse(stringLogLevel, true, out LogLevel logLevel))
+    {
+      logLevel = LogLevel.Information;
+      Logger.Warn("Log level '" + stringLogLevel + "' is invalid, using 'Information' instead.");
+    }
+    Logger.SetLogLevel(logLevel);
+
+    Token = json.SelectToken("bot.token")?.Value<string>() ?? "";
+    PresenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
+    PresenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
+
+    Initialized = true;
+  }
 }

@@ -1,27 +1,23 @@
-﻿
 bot:
-    # Bot token.
-    token: "<add-token-here>"
-    # Decides which messages are shown in console
-    # Possible values are: Critical, Error, Warning, Information, Debug.
-    console-log-level: "Information"
-    # A list of role ids that should be tracked
-    tracked-roles:
-      - 111111111111111111
-      - 222222222222222222
-      - 333333333333333333
-    # Sets the type of activity for the bot to display in its presence status
-    # Possible values are: Playing, Streaming, ListeningTo, Watching, Competing
-    presence-type: "Watching"
-    # Sets the activity text shown in the bots status
-    presence-text: "Discord"
+  # Bot token.
+  token: "<add-token-here>"
 
-database:
-    # Address and port of the mysql server
-    address: "127.0.0.1"
-    port: 3306
-    # Name of the database to use
-    name: "muteboi"
-    # Username and password for authentication
-    user: ""
-    password: ""
+  # Decides which messages are shown in console
+  # Possible values are: Critical, Error, Warning, Information, Debug.
+  console-log-level: "Information"
+
+  # Sets the type of activity for the bot to display in its presence status
+  # Possible values are: Playing, Streaming, ListeningTo, Watching, Competing
+  presence-type: "Watching"
+
+  # Sets the activity text shown in the bots status
+  presence-text: "Discord"
+
+  # Log all console output to a file, can be overridden using command line arguments. Set to "" to disable.
+  # When running the bot as a service this will be set to "/var/log/roleboi/roleboi.log" by the service.
+  # The log file will still log all log levels regardless of the console log level setting.
+  log-file: ""
+
+  # Path to where the sqlite database file is saved.
+  # When running the bot as a service this will be set to "/var/lib/roleboi/roleboi.db" by the service.
+  database-file: "./roleboi.db"

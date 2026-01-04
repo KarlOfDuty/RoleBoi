@@ -1,0 +1,3 @@
+d /var/lib/roleboi 0700 roleboi roleboi -
+f /etc/roleboi/config.yml 0600 roleboi roleboi -
+d /var/log/roleboi 0755 roleboi roleboi -

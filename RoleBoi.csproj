@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version>0.1.0</Version>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>roleboi</AssemblyName>
+    <StartupObject>RoleBoi.RoleBoi</StartupObject>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <PublishSingleFile>true</PublishSingleFile>
+    <TrimMode>partial</TrimMode>
+    <DebugType>embedded</DebugType>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    
+    <Authors>KarlofDuty</Authors>
+    <Description>A small role management Discord bot.</Description>
+    <NeutralLanguage>en</NeutralLanguage>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/KarlOfDuty/RoleBoi</RepositoryUrl>
+
+    <PackageIconUrl>https://karlofduty.com/img/tardisIcon.jpg</PackageIconUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/KarlOfDuty/RoleBoi</PackageProjectUrl>
+    <PackageVersion>0.1.0</PackageVersion>
+    <LangVersion>default</LangVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <GitVersion>false</GitVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02515" />
+    <PackageReference Include="DSharpPlus.Analyzers" Version="5.0.0-nightly-02515" />
+    <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02515" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02515" />
+    <PackageReference Include="EmbeddedBuildTime" Version="1.0.3" />
+    <PackageReference Include="GitInfo" Version="3.3.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
+    <PackageReference Include="Tmds.Systemd" Version="0.8.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="default_config.yml" />
+  </ItemGroup>
+</Project>
