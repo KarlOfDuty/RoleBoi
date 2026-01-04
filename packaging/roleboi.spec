@@ -8,13 +8,11 @@ Summary:    A small role management Discord bot (dev build)
 Version:    %{base_version}~%(date "+%%Y%%m%%d%%H%%M%%S")git%(git rev-parse --short HEAD)
 Provides:   roleboi = %{version}
 Conflicts:  roleboi
-Obsoletes:  roleboi < %{version}
 %else
 Name:       roleboi
 Summary:    A small role management Discord bot
 Version:    %{base_version}
 Conflicts:  roleboi-dev
-Obsoletes:  roleboi-dev < %{version}
 %endif
 Release:    1%{?dist}
 License:    GPLv3
