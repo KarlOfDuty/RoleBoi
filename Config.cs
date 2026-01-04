@@ -9,12 +9,10 @@ namespace RoleBoi;
 
 internal static class Config
 {
-  internal static string token = "";
-  internal static string presenceType = "Playing";
-  internal static string presenceText = "";
-
-  internal static string databaseFile = "./roleboi.db";
-
+  public static string Token { get; private set; } = "";
+  public static string PresenceType { get; private set; } = "Playing";
+  public static string PresenceText { get; private set; } = "";
+  public static string DatabaseFile { get; private set; } = "./roleboi.db";
   public static string ConfigPath { get; private set; } = "./config.yml";
   public static string LogPath { get; private set; } = "";
 
@@ -52,6 +50,12 @@ internal static class Config
       LogPath = RoleBoi.commandLineArgs.LogFilePath;
     }
 
+    DatabaseFile = json.SelectToken("bot.database-file")?.Value<string>() ?? "./roleboi.db";
+    if (!string.IsNullOrEmpty(RoleBoi.commandLineArgs.DatabasePath))
+    {
+      DatabaseFile = RoleBoi.commandLineArgs.DatabasePath;
+    }
+
     string stringLogLevel = json.SelectToken("bot.console-log-level")?.Value<string>() ?? "";
     if (!Enum.TryParse(stringLogLevel, true, out LogLevel logLevel))
     {
@@ -60,10 +64,9 @@ internal static class Config
     }
     Logger.SetLogLevel(logLevel);
 
-    token = json.SelectToken("bot.token")?.Value<string>() ?? "";
-    presenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
-    presenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
-    databaseFile = json.SelectToken("bot.database-file")?.Value<string>() ?? "./roleboi.db";
+    Token = json.SelectToken("bot.token")?.Value<string>() ?? "";
+    PresenceType = json.SelectToken("bot.presence-type")?.Value<string>() ?? "Playing";
+    PresenceText = json.SelectToken("bot.presence-text")?.Value<string>() ?? "";
 
     Initialized = true;
   }

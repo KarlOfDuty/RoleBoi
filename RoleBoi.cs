@@ -49,6 +49,13 @@ internal static class RoleBoi
             MetaValue = "PATH")]
         public string LogFilePath { get; set; }
 
+        [CommandLine.Option('d',
+            "database-file",
+            Required = false,
+            HelpText = "Select database file path.",
+            MetaValue = "PATH")]
+        public string DatabasePath { get; set; }
+
         [CommandLine.Option("leave",
                 Required = false,
                 HelpText = "Leaves one or more Discord servers. " +
@@ -212,7 +219,7 @@ internal static class RoleBoi
         }
 
         // Check if token is unset
-        if (Config.token is "<add-token-here>" or "")
+        if (Config.Token is "<add-token-here>" or "")
         {
             Logger.Fatal("You need to set your bot token in the config and start the bot again.");
             return false;
@@ -221,7 +228,6 @@ internal static class RoleBoi
         // Database connection and setup
         try
         {
-            Logger.Log("Opening database file: " + Path.GetFullPath(Config.databaseFile));
             Database.SetupTables();
         }
         catch (Exception e)
@@ -235,7 +241,7 @@ internal static class RoleBoi
     private static async Task<bool> Connect()
     {
         Logger.Log("Setting up Discord client.");
-        DiscordClientBuilder clientBuilder = DiscordClientBuilder.CreateDefault(Config.token, DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers)
+        DiscordClientBuilder clientBuilder = DiscordClientBuilder.CreateDefault(Config.Token, DiscordIntents.AllUnprivileged | DiscordIntents.GuildMembers)
                                                                  .SetReconnectOnFatalGatewayErrors();
 
         clientBuilder.ConfigureServices(configure =>
@@ -319,13 +325,13 @@ internal static class RoleBoi
     {
         try
         {
-            if (!Enum.TryParse(Config.presenceType, true, out DiscordActivityType activityType))
+            if (!Enum.TryParse(Config.PresenceType, true, out DiscordActivityType activityType))
             {
-                Logger.Log("Presence type '" + Config.presenceType + "' invalid, using 'Playing' instead.");
+                Logger.Log("Presence type '" + Config.PresenceType + "' invalid, using 'Playing' instead.");
                 activityType = DiscordActivityType.Playing;
             }
 
-            client.UpdateStatusAsync(new DiscordActivity(Config.presenceText, activityType), DiscordUserStatus.Online);
+            client.UpdateStatusAsync(new DiscordActivity(Config.PresenceText, activityType), DiscordUserStatus.Online);
         }
         finally
         {

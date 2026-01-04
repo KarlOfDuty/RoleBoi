@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Data.Sqlite;
 
 namespace RoleBoi
@@ -22,7 +23,7 @@ namespace RoleBoi
 
     public static SqliteConnection GetConnection()
     {
-      return new SqliteConnection("Data Source=" + Config.databaseFile + ";Cache=Shared");
+      return new SqliteConnection("Data Source=" + Config.DatabaseFile + ";Cache=Shared");
     }
 
     private static int ExecuteNonQuery(string sql, Dictionary<string, long> longVars = null)
@@ -44,6 +45,7 @@ namespace RoleBoi
 
     public static void SetupTables()
     {
+      Logger.Log("Initializing database: " + Path.GetFullPath(Config.DatabaseFile));
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS user_roles (user_id INTEGER NOT NULL, role_id INTEGER NOT NULL, time TEXT NOT NULL);");
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_tracked_roles    (role_id INTEGER PRIMARY KEY)");
       ExecuteNonQuery("CREATE TABLE IF NOT EXISTS config_pingable_roles   (role_id INTEGER PRIMARY KEY)");
