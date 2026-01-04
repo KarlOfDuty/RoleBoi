@@ -22,12 +22,9 @@ BuildRequires: systemd-rpm-macros
 Requires: dotnet-runtime-9.0
 %{?systemd_requires}
 
-# TODO: Update this!
-
 %description
-Retains specific Discord roles if users rejoin the server.
-Useful for muted roles or other permission negating roles.
-Leaving members are saved in a mysql database with all tracked roles they had when they left.
+A small role management Discord bot. Can automate tasks like giving users roles
+on join, retaining roles when rejoining and letting users select roles manually.
 
 %prep
 %setup -T -c

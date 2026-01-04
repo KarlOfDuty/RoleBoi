@@ -14,9 +14,8 @@ roleboi - A small role management Discord bot.
 
 # DESCRIPTION
 
-**roleboi** retains specific Discord roles if users rejoin the server. TODO: Update This!
-Useful for muted roles or other permission negating roles.
-Leaving members are saved in a mysql database with all tracked roles they had when they left.
+**roleboi** is a small role management Discord bot. It can automate tasks like giving users roles
+on join, retaining roles when rejoining and letting users select roles manually.
 
 # OPTIONS
 
@@ -25,6 +24,9 @@ Leaving members are saved in a mysql database with all tracked roles they had wh
 
 **-l**, **--log-path**=*PATH*
 :   Set the log file path.
+
+**-d**, **--database-path**=*PATH*
+:   Set the database file path.
 
 **--leave**=*ID[,ID...]*
 :   Make the bot leave specific Discord servers using their server IDs.
@@ -43,15 +45,6 @@ A default configuration file is created automatically if none exists when the bo
 
 It is fully commented and includes documentation for each configuration option.
 
-# DATABASE
-
-The bot requires a MySQL/MariaDB database to store most of its data.
-
-Requirements:
-
-- A database for the bot to store its data in.
-- A user with full permissions on the database, and ideally no permissions on anything else.
-
 # FILES
 
 */etc/roleboi/config.yml*
@@ -59,6 +52,9 @@ Requirements:
 
 */var/log/roleboi/roleboi.log*
 :   System-wide log file, used when running as a service.
+
+*/var/lib/roleboi/roleboi.db*
+:   System-wide database file, used when running as a service.
 
 # EXIT STATUS
 
@@ -68,17 +64,17 @@ Requirements:
 
 # EXAMPLES
 
-Start the bot with the configuration file and transcripts in the current working directory:
+Start the bot with the configuration and database in the current working directory:
 
     roleboi
 
-Specify a custom configuration file and transcripts directory:
+Specify a custom configuration and database file:
 
-    roleboi --config /path/to/config.yml --transcripts /path/to/transcripts
+    roleboi --config /path/to/config.yml --database-path /path/to/database
 
 Run the bot as the roleboi user using default system paths:
 
-    sudo -u "roleboi" roleboi --config /etc/roleboi/config.yml
+    sudo -u "roleboi" roleboi --config /etc/roleboi/config.yml --database-file /var/lib/roleboi/roleboi.db
 
 Start the bot using the included systemd service:
 
