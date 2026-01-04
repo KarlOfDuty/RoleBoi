@@ -148,51 +148,49 @@ namespace RoleBoi
     {
       try
       {
-        switch (e.Interaction.Data.ComponentType)
+        if (e.Interaction.Data.ComponentType != DiscordComponentType.StringSelect)
         {
-          case DiscordComponentType.StringSelect:
-            if (!e.Interaction.Data.CustomId.StartsWith("roleboi_togglerole"))
-            {
-              return;
-            }
+          Logger.Warn("Unknown interaction type received! '" + e.Interaction.Data.ComponentType + "'");
+          return;
+        }
 
-            if (e.Interaction.Data.Values.Length == 0)
-            {
-              await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage);
-            }
+        if (!e.Interaction.Data.CustomId.StartsWith("roleboi_togglerole"))
+        {
+          return;
+        }
 
-            foreach (string stringID in e.Interaction.Data.Values)
-            {
-              if (!ulong.TryParse(stringID, out ulong roleID) || roleID == 0) continue;
+        if (e.Interaction.Data.Values.Length == 0)
+        {
+          await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage);
+        }
 
-              DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-              if (!e.Guild.Roles.ContainsKey(roleID) || member == null) continue;
+        foreach (string stringID in e.Interaction.Data.Values)
+        {
+          if (!ulong.TryParse(stringID, out ulong roleID) || roleID == 0) continue;
 
-              if (member.Roles.Any(role => role.Id == roleID))
+          DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+          if (!e.Guild.Roles.ContainsKey(roleID) || member == null) continue;
+
+          if (member.Roles.Any(role => role.Id == roleID))
+          {
+            await member.RevokeRoleAsync(e.Guild.Roles[roleID]);
+            await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+              new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
               {
-                await member.RevokeRoleAsync(e.Guild.Roles[roleID]);
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                  new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
-                  {
-                    Color = DiscordColor.Green,
-                    Description = "Revoked role " + e.Guild.Roles[roleID].Mention + "!"
-                  }).AsEphemeral());
-              }
-              else
+                Color = DiscordColor.Green,
+                Description = "Revoked role " + e.Guild.Roles[roleID].Mention + "!"
+              }).AsEphemeral());
+          }
+          else
+          {
+            await member.GrantRoleAsync(e.Guild.Roles[roleID]);
+            await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+              new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
               {
-                await member.GrantRoleAsync(e.Guild.Roles[roleID]);
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                  new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder
-                  {
-                    Color = DiscordColor.Green,
-                    Description = "Granted role " + e.Guild.Roles[roleID].Mention + "!"
-                  }).AsEphemeral());
-              }
-            }
-            break;
-          default:
-            Logger.Warn("Unknown interaction type received! '" + e.Interaction.Data.ComponentType + "'");
-            return;
+                Color = DiscordColor.Green,
+                Description = "Granted role " + e.Guild.Roles[roleID].Mention + "!"
+              }).AsEphemeral());
+          }
         }
       }
       catch (UnauthorizedException)

@@ -165,7 +165,7 @@ While the Windows versions are fully supported they are not as well tested as th
 
 </details>
 
-# Running the Bot for the First Time
+## Running the Bot for the First Time
 
 > [!TIP]
 > If you want a very simple setup with its files placed in the current working directory and the bot running in your terminal, choose the basic setup.
@@ -230,7 +230,7 @@ journalctl -fu roleboi
 
 </details>
 
-# Set up command permissions
+## Set up command permissions
 
 Go to `Settings->Integrations->Bot->Command Permissions` in your Discord server to set up permissions for the commands:
 

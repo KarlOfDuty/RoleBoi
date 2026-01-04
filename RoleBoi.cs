@@ -27,7 +27,7 @@ namespace RoleBoi;
 
 internal static class RoleBoi
 {
-    internal static DiscordClient client = null;
+    private static DiscordClient client = null;
 
     internal const string APPLICATION_NAME = "RoleBoi";
 

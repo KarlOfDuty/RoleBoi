@@ -9,15 +9,12 @@ This is a small Discord bot that helps with simple role management automation. I
 
 All of these functions are completely independent of each other and can be completely turned off by simply turning the related commands off in the Discord settings.
 
-## Setup
+#### Setup
 
-1. [Create a new bot application](https://discordpy.readthedocs.io/en/latest/discord.html).
+1. [Register a bot in the Discord Developer panel](docs/RegisterBotApplication.md)
+2. [Install the bot and set up a MySQL database for it](docs/Installation.md)
 
-2. Download the bot executable for your operating system, either a [release version](https://github.com/KarlOfDuty/RoleBoi/releases) or a [dev build](http://95.217.45.17:8080/blue/organizations/jenkins/RoleBoi/activity). The bot should include dotnet but if your bot doesnt work and this seems to be the issue please tell me.
-
-3. Run the bot executable once to generate the config.
-
-4. Set up the config (`config.yml`) to your specifications, there are instructions inside and also further down on this page. If you need more help either contact me in Discord or through an issue here.
+You can find the default config [here](./default_config.yml).
 
 ## Commands
 | Command                                                                                                               | Description                                                                                                       |
@@ -27,4 +24,3 @@ All of these functions are completely independent of each other and can be compl
 | `/removejoinrole <role>`<br>`/removetrackedrole <role>`<br>`/removeselectablerole <role>`<br>`/removepingrole <role>` | Removes a role from their respective list.                                                                        |
 | `/createroleselector`                                                                                                 | Creates a role selector message which users can use to join any role added with the `/addselectablerole` command. |
 | `/ping <role>`                                                                                                        | Pings a role added with `/addpingrole` even if it would normally be un-pingable by the user.                      |
-
