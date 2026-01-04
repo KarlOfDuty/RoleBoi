@@ -18,7 +18,7 @@ pipeline
           env.DOTNET_CLI_HOME = "/tmp/.dotnet"
           env.DEBEMAIL="xkaess22@gmail.com"
           env.DEBFULLNAME="Karl Essinger"
-          //env.AUR_GIT_PACKAGE="roleboi-git"
+          env.AUR_GIT_PACKAGE="roleboi-git"
           env.DEV_BUILD = params.BUILD_TYPE == 'dev' ? "true" : "false"
           env.PACKAGE_NAME = params.BUILD_TYPE == 'dev' ? "roleboi-dev" : "roleboi"
           env.RPMBUILD_ARGS = params.BUILD_TYPE == 'dev' ? "--define 'dev_build true'" : ""
@@ -44,7 +44,7 @@ pipeline
         }
       }
     }
-/*     stage('Update AUR Version')
+    stage('Update AUR Version')
     {
       when
       {
@@ -64,7 +64,7 @@ pipeline
           common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/roleboi-git.pkgbuild", "packaging/roleboi.install")
         }
       }
-    } */
+    }
     stage('Build / Package')
     {
       parallel
@@ -328,7 +328,7 @@ pipeline
           common.create_github_release("KarlOfDuty/RoleBoi", params.RELEASE_VERSION, artifacts, params.BUILD_TYPE == 'pre-release')
 
           // Update AUR version after the tag is created
-          //common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/roleboi-git.pkgbuild", "packaging/roleboi.install")
+          common.update_aur_git_package(env.AUR_GIT_PACKAGE, "packaging/roleboi-git.pkgbuild", "packaging/roleboi.install")
         }
       }
     }
