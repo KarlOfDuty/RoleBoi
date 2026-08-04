@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,9 @@ public class PingCommand
     }
 
     Logger.Log($"{command.Member.Username} ({command.Member.Id}) pinged the '{role.Name}' role.");
-    await command.RespondAsync(role.Mention);
+
+    DiscordMessageBuilder messageBuilder = new DiscordMessageBuilder().WithAllowedMention(new RoleMention(role));
+    messageBuilder.Content = role.Mention;
+    await command.RespondAsync(messageBuilder);
   }
 }

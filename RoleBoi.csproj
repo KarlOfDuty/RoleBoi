@@ -24,7 +24,7 @@
     <PackageIconUrl>https://karlofduty.com/img/tardisIcon.jpg</PackageIconUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/KarlOfDuty/RoleBoi</PackageProjectUrl>
-    <PackageVersion>0.1.0</PackageVersion>
+    <PackageVersion>$(Version)</PackageVersion>
     <LangVersion>default</LangVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GitVersion>false</GitVersion>
